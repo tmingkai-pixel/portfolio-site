@@ -1,0 +1,61 @@
+---
+const base = import.meta.env.BASE_URL;
+const links = [
+	{ href: base, label: "Home" },
+	{ href: `${base}about/`, label: "About" },
+	{ href: `${base}works/`, label: "Works" },
+];
+const path = Astro.url.pathname;
+const isCurrent = (href: string) =>
+	href === base ? path === base : path.startsWith(href);
+---
+
+<nav aria-label="Main">
+	<ul>
+		{links.map((link) => (
+			<li>
+				<a
+					href={link.href}
+					class="mono"
+					aria-current={isCurrent(link.href) ? "page" : undefined}
+				>
+					{link.label}
+				</a>
+			</li>
+		))}
+	</ul>
+</nav>
+
+<style>
+	nav {
+		background: var(--navy);
+		padding: 10px var(--gutter) 0;
+	}
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		justify-content: flex-end;
+		gap: 2px;
+	}
+	a {
+		display: block;
+		min-width: 78px;
+		text-align: center;
+		background: var(--orange);
+		color: var(--navy);
+		font-size: 0.7rem;
+		font-weight: 700;
+		text-decoration: none;
+		padding: 0.3rem 1rem 0.2rem;
+		border-radius: 12px 12px 0 0;
+		transition: background-color 0.15s ease;
+	}
+	a:hover {
+		background: #f0901f;
+	}
+	a[aria-current="page"] {
+		background: var(--tab-active);
+	}
+</style>

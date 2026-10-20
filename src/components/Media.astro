@@ -1,0 +1,53 @@
+---
+/**
+ * Shows an image or video from public/media/. If the file isn't there yet,
+ * renders a labelled placeholder so you can see where it needs to go.
+ */
+import fs from "node:fs";
+import path from "node:path";
+
+interface Props {
+	/** Path inside public/media/, e.g. "works/uniqlo-sustainability-pop-up/cover.jpg" */
+	src: string;
+	alt?: string;
+	class?: string;
+	/** Video only: play muted on loop like a GIF (default true) */
+	ambient?: boolean;
+}
+
+const { src, alt = "", class: className, ambient = true } = Astro.props;
+const exists = fs.existsSync(path.join(process.cwd(), "public", "media", src));
+const url = `${import.meta.env.BASE_URL}media/${src}`;
+const isVideo = /\.(mp4|webm|mov)$/i.test(src);
+---
+
+{!exists ? (
+	<div class:list={["placeholder", className]} role="img" aria-label={alt}>
+		<span class="mono">media/{src}</span>
+	</div>
+) : isVideo ? (
+	ambient ? (
+		<video class={className} src={url} autoplay muted loop playsinline aria-label={alt} />
+	) : (
+		<video class={className} src={url} controls playsinline aria-label={alt} />
+	)
+) : (
+	<img class={className} src={url} alt={alt} loading="lazy" decoding="async" />
+)}
+
+<style>
+	.placeholder {
+		display: flex;
+		align-items: flex-end;
+		background: var(--placeholder);
+		min-height: 160px;
+		padding: 0.6rem;
+		color: #7a7a7a;
+		font-size: 0.65rem;
+		overflow-wrap: anywhere;
+	}
+	img,
+	video {
+		object-fit: cover;
+	}
+</style>

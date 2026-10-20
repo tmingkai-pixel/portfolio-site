@@ -1,0 +1,241 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Media from "../components/Media.astro";
+import { getWorks, workMedia } from "../lib/works";
+
+const base = import.meta.env.BASE_URL;
+const works = await getWorks();
+
+// Hero slideshow: files in public/media/home/
+const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
+---
+
+<Layout title="Home">
+	<section class="hero">
+		<h1 class="display">Design Driven<br />by Purpose</h1>
+		<p class="byline mono">By Tan Ming-Kai</p>
+
+		<div class="slideshow" data-slideshow>
+			{heroSlides.map((src, i) => (
+				<div class="slide" data-slide hidden={i !== 0}>
+					<Media src={src} alt={`Showreel clip ${i + 1}`} class="slide-media" />
+				</div>
+			))}
+			{heroSlides.length > 1 && (
+				<div class="slide-controls">
+					<button type="button" data-prev aria-label="Previous clip">←</button>
+					<button type="button" data-next aria-label="Next clip">→</button>
+				</div>
+			)}
+		</div>
+	</section>
+
+	<section class="bio">
+		<p data-reveal>Hands-on experience in 3D printing and general crafting with <em>5 years</em> in the cardboard craft and structural/sculptural events industry.</p>
+		<p data-reveal>Practiced at typography, publication design and advertising with my <em>Communication Design Diploma</em> at Temasek Polytechnic.</p>
+		<p data-reveal>My <em>Computer Science Degree</em> at SUSS complements my making background with a technical foundation useful for electronics, IT workshops, or CAD/design instruction.</p>
+	</section>
+
+	<section class="gallery" aria-label="Selected works">
+		<div class="gallery-track" data-track>
+			{works.map((work) => (
+				<a class="gallery-item" href={`${base}works/${work.id}/`}>
+					<Media
+						src={workMedia(work.id, work.data.cover)}
+						alt={work.data.title}
+						class="gallery-media"
+					/>
+					<span class="gallery-caption mono">{work.data.title}</span>
+				</a>
+			))}
+		</div>
+		<button type="button" class="gallery-next" data-track-next aria-label="Scroll gallery">→</button>
+	</section>
+</Layout>
+
+<style>
+	/* ---------- Hero ---------- */
+	.hero {
+		position: relative;
+		padding: 0.5rem var(--gutter) 2.5rem;
+	}
+	.hero h1 {
+		font-size: clamp(3.4rem, 15.5vw, 15rem);
+		margin-left: -0.04em;
+	}
+	.byline {
+		color: var(--orange);
+		font-size: clamp(0.9rem, 1.6vw, 1.2rem);
+		margin: 1.75rem 0 2rem;
+	}
+	.slideshow {
+		position: relative;
+		width: min(100%, 420px);
+		aspect-ratio: 344 / 373;
+		margin-left: auto;
+	}
+	.slide,
+	:global(.slide-media) {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+	.slide-controls {
+		position: absolute;
+		bottom: 1rem;
+		left: 0;
+		right: 0;
+		display: flex;
+		justify-content: center;
+		gap: 1.25rem;
+		z-index: 1;
+	}
+	.slide-controls button,
+	.gallery-next {
+		width: 26px;
+		height: 18px;
+		border: 0;
+		border-radius: 999px;
+		background: var(--orange);
+		color: var(--navy);
+		font-size: 0.75rem;
+		line-height: 1;
+		cursor: pointer;
+	}
+	@media (min-width: 900px) {
+		.hero {
+			/* room for the slideshow: its top offset + its height */
+			min-height: calc(24vw + 37vw + 3rem);
+		}
+		/* Overlap the headline like the original */
+		.slideshow {
+			position: absolute;
+			right: 8.5vw;
+			top: 24vw;
+			width: 34vw;
+			max-width: none;
+		}
+	}
+
+	/* ---------- Bio ---------- */
+	.bio {
+		background: var(--navy);
+		padding: 3.5rem var(--gutter) 4rem;
+	}
+	.bio p {
+		color: var(--orange);
+		font-size: clamp(1.4rem, 3.3vw, 2.6rem);
+		line-height: 1.2;
+		letter-spacing: -0.02em;
+		max-width: 22em;
+		margin: 0 0 1.2em;
+	}
+	.bio p:last-child {
+		margin-bottom: 0;
+	}
+	.bio em {
+		font-style: normal;
+		color: #fff;
+	}
+	/* Blurred text sharpens as it scrolls into view (where supported) */
+	@supports (animation-timeline: view()) {
+		[data-reveal] {
+			animation: sharpen linear both;
+			animation-timeline: view();
+			animation-range: entry 10% cover 35%;
+		}
+	}
+	@keyframes sharpen {
+		from {
+			filter: blur(10px);
+			opacity: 0.35;
+		}
+		to {
+			filter: blur(0);
+			opacity: 1;
+		}
+	}
+
+	/* ---------- Gallery ---------- */
+	.gallery {
+		position: relative;
+		padding: 2.5rem 0 0;
+	}
+	.gallery-track {
+		display: flex;
+		gap: 1rem;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scroll-padding: 0 var(--gutter);
+		padding: 0 var(--gutter);
+		scrollbar-width: none;
+	}
+	.gallery-track::-webkit-scrollbar {
+		display: none;
+	}
+	.gallery-item {
+		position: relative;
+		flex: 0 0 auto;
+		scroll-snap-align: start;
+		text-decoration: none;
+	}
+	.gallery-item :global(.gallery-media) {
+		height: clamp(280px, 38vw, 480px);
+		width: auto;
+		min-width: 220px;
+	}
+	.gallery-item :global(.placeholder.gallery-media) {
+		width: clamp(220px, 30vw, 380px);
+	}
+	.gallery-caption {
+		position: absolute;
+		left: 0.75rem;
+		bottom: 0.75rem;
+		background: var(--orange);
+		color: var(--navy);
+		font-size: 0.65rem;
+		font-weight: 700;
+		padding: 0.2rem 0.5rem;
+		border-radius: 999px;
+		opacity: 0;
+		transition: opacity 0.15s ease;
+	}
+	.gallery-item:hover .gallery-caption,
+	.gallery-item:focus-visible .gallery-caption {
+		opacity: 1;
+	}
+	.gallery-next {
+		position: absolute;
+		right: calc(var(--gutter) + 1rem);
+		top: 50%;
+		width: 36px;
+		height: 36px;
+		background: rgba(255, 255, 255, 0.8);
+		color: var(--navy);
+		font-size: 1rem;
+	}
+</style>
+
+<script>
+	// Hero slideshow
+	for (const show of document.querySelectorAll<HTMLElement>("[data-slideshow]")) {
+		const slides = [...show.querySelectorAll<HTMLElement>("[data-slide]")];
+		let current = 0;
+		const go = (step: number) => {
+			slides[current].hidden = true;
+			current = (current + step + slides.length) % slides.length;
+			slides[current].hidden = false;
+		};
+		show.querySelector("[data-prev]")?.addEventListener("click", () => go(-1));
+		show.querySelector("[data-next]")?.addEventListener("click", () => go(1));
+	}
+
+	// Gallery arrow: scroll one item, wrap to start at the end
+	const track = document.querySelector<HTMLElement>("[data-track]");
+	document.querySelector("[data-track-next]")?.addEventListener("click", () => {
+		if (!track) return;
+		const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+		track.scrollBy({ left: atEnd ? -track.scrollWidth : track.clientWidth * 0.6, behavior: "smooth" });
+	});
+</script>

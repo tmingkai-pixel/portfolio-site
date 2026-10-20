@@ -1,0 +1,207 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+const contact = {
+	email: "tmingkai2@gmail.com",
+	linkedin: "https://www.linkedin.com/in/mingkaitan/",
+};
+
+const techSkills = ["Adobe Suite", "Rhinoceros 3D", "Nomad Sculpt", "Blender", "Google Analytics"];
+const softSkills = ["Project Management", "Problem solving", "Excellent communicator", "Leadership"];
+
+const education = [
+	{ title: "Degree in Computer Sciences", where: "Singapore University of Social Sciences", when: "2024 - 2027" },
+	{ title: "Post-Diploma in Creative Content Creation", where: "Nanyang Polytechnic", when: "2020 - 2021" },
+	{ title: "Diploma in Communication Design", where: "Temasek Polytechnic", when: "2017 - 2020" },
+];
+
+const experience = [
+	{
+		title: "Graphics Communications Executive",
+		roles: [
+			{
+				where: "Paper Carpenter",
+				when: "2019 - 2024",
+				points: [
+					"Ran social media accounts and marketing",
+					"Managed websites in both design and administration",
+					"Designed and executed events projects from start to end product",
+					"Designed product packaging and associated social media marketing campaigns",
+					"Managed company branding",
+					"Developed new brand identity of subsidiary companies",
+					"Product photographer and videographer for various media",
+				],
+			},
+		],
+	},
+	{
+		title: "Freelance Graphic Designer",
+		roles: [
+			{
+				where: "Generation X Events",
+				when: "2016 - 2017",
+				points: [
+					"Responsible for designing print and digital graphic content for social events for companies such as Samsung and Hyundai",
+					"Liaised directly with company representatives and vendors",
+				],
+			},
+			{
+				where: "Takashimaya Singapore",
+				when: "2019",
+				points: [
+					"Part of a team of 3 responsible for creating designs for advertising in both print and digital media",
+					"Liaised between departments for logistics and administration",
+				],
+			},
+		],
+	},
+];
+---
+
+<Layout title="About" description="Tan Ming-Kai — graphic designer with 5+ years of experience, now studying Computer Science at SUSS.">
+	<div class="about">
+		<aside class="side">
+			<h1 class="display">About</h1>
+			<p class="intro">
+				A graphic designer with 5+ years of experience working with and managing
+				design projects from conceptualisation to finished product.
+			</p>
+
+			<div class="side-bottom">
+				<div class="links">
+					<a class="pill" href={`mailto:${contact.email}?subject=Hello!`}>Contact Me</a>
+					<a class="pill" href={contact.linkedin} target="_blank" rel="noopener">LinkedIn</a>
+				</div>
+				<div class="skills">
+					<div>
+						<h2 class="label">Tech skills</h2>
+						<ul>{techSkills.map((s) => <li>{s}</li>)}</ul>
+					</div>
+					<div>
+						<h2 class="label">Soft skills</h2>
+						<ul>{softSkills.map((s) => <li>{s}</li>)}</ul>
+					</div>
+				</div>
+			</div>
+		</aside>
+
+		<div class="main">
+			<section>
+				<h2 class="label">Education</h2>
+				{education.map((item) => (
+					<div class="entry">
+						<h3>{item.title}</h3>
+						<p class="meta mono">{item.where} • {item.when}</p>
+					</div>
+				))}
+			</section>
+
+			<section>
+				<h2 class="label">Professional experience</h2>
+				{experience.map((job) => (
+					<div class="job">
+						<h3 class="job-title">{job.title}</h3>
+						{job.roles.map((role) => (
+							<div class="role">
+								<p class="meta mono">{role.where} • {role.when}</p>
+								<ul class="points">{role.points.map((p) => <li>{p}</li>)}</ul>
+							</div>
+						))}
+					</div>
+				))}
+			</section>
+		</div>
+	</div>
+</Layout>
+
+<style>
+	.about {
+		display: grid;
+		gap: 2.5rem;
+		padding: 1rem var(--gutter) 0;
+	}
+	.side h1 {
+		font-size: clamp(3rem, 6vw, 4.75rem);
+	}
+	.intro {
+		font-size: 1.05rem;
+		max-width: 26em;
+		margin: 1.25rem 0 2rem;
+	}
+	.links {
+		display: grid;
+		gap: 0.6rem;
+		margin-bottom: 2rem;
+	}
+	.skills {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+	}
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		font-size: 0.9rem;
+	}
+	.main section + section {
+		border-top: 1.5px solid var(--orange);
+		margin-top: 2rem;
+		padding-top: 2rem;
+	}
+	.entry + .entry {
+		margin-top: 1.4rem;
+	}
+	h3 {
+		color: var(--orange);
+		font-weight: 400;
+		letter-spacing: -0.02em;
+		line-height: 1.1;
+		margin: 0 0 0.3rem;
+		font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+	}
+	.job + .job {
+		margin-top: 2.5rem;
+	}
+	.job-title {
+		font-size: clamp(1.6rem, 3.2vw, 2.3rem);
+		margin-bottom: 1rem;
+	}
+	.role + .role {
+		margin-top: 1.5rem;
+	}
+	.meta {
+		font-size: 0.72rem;
+		font-weight: 600;
+		margin: 0 0 0.5rem;
+	}
+	.points {
+		font-size: 0.9rem;
+		line-height: 1.45;
+		max-width: 40em;
+	}
+	.points li::before {
+		content: "• ";
+	}
+
+	@media (min-width: 900px) {
+		.about {
+			grid-template-columns: minmax(260px, 37%) 1fr;
+			gap: 3rem;
+		}
+		.side {
+			position: sticky;
+			top: 1rem;
+			align-self: start;
+			display: flex;
+			flex-direction: column;
+			min-height: calc(100vh - 3rem);
+		}
+		.side-bottom {
+			margin-top: auto;
+		}
+		.main {
+			padding-top: 1.25rem;
+		}
+	}
+</style>

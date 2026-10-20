@@ -1,0 +1,94 @@
+@import "@fontsource-variable/inter/opsz.css";
+@import "@fontsource-variable/geist-mono";
+
+:root {
+	--bg: #d9d9d9;
+	--orange: #e17b0a;
+	--navy: #1c3184;
+	--tab-active: #dedede;
+	--placeholder: #c4c4c4;
+	--font-sans: "Inter Variable", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	--font-mono: "Geist Mono Variable", ui-monospace, monospace;
+	--gutter: clamp(16px, 1.5vw, 24px);
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	background: var(--bg);
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--navy);
+	font-family: var(--font-sans);
+	font-optical-sizing: auto;
+	line-height: 1.4;
+	-webkit-font-smoothing: antialiased;
+	overflow-x: hidden;
+}
+
+img,
+video {
+	display: block;
+	max-width: 100%;
+}
+
+a {
+	color: inherit;
+}
+
+/* Big orange display type: the core of the look */
+.display {
+	font-family: var(--font-sans);
+	font-weight: 600;
+	color: var(--orange);
+	letter-spacing: -0.055em;
+	line-height: 0.88;
+	margin: 0;
+}
+
+/* Small uppercase monospace labels */
+.mono {
+	font-family: var(--font-mono);
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+}
+
+.label {
+	font-family: var(--font-mono);
+	text-transform: uppercase;
+	font-size: 0.75rem;
+	color: #7a7a7a;
+	margin: 0 0 0.75rem;
+	font-weight: 500;
+}
+
+.pill {
+	display: block;
+	text-align: center;
+	border: 1.5px solid var(--orange);
+	border-radius: 999px;
+	color: var(--orange);
+	text-decoration: none;
+	padding: 0.35rem 1rem;
+	transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.pill:hover {
+	background: var(--orange);
+	color: var(--bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation: none !important;
+		transition: none !important;
+		scroll-behavior: auto !important;
+	}
+}

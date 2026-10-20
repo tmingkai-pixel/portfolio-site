@@ -1,0 +1,141 @@
+---
+import { render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import Media from "../../components/Media.astro";
+import { getWorks, workMedia } from "../../lib/works";
+
+export async function getStaticPaths() {
+	const works = await getWorks();
+	return works.map((work, i) => ({
+		params: { id: work.id },
+		props: { work, prev: works[i - 1], next: works[i + 1] },
+	}));
+}
+
+const { work, prev, next } = Astro.props;
+const { Content } = await render(work);
+const { data } = work;
+const base = import.meta.env.BASE_URL;
+
+const details = [
+	["Role", data.role],
+	["Date", data.date],
+	["Project type", data.category],
+	["Done under", data.doneUnder],
+].filter(([, value]) => value);
+---
+
+<Layout title={data.title} description={data.summary}>
+	<article>
+		<div class="intro">
+			<div class="text">
+				<h1 class="display">{data.title}</h1>
+				<div class="body"><Content /></div>
+
+				<dl>
+					{details.map(([label, value]) => (
+						<div>
+							<dt class="label">{label}</dt>
+							<dd>{value}</dd>
+						</div>
+					))}
+				</dl>
+			</div>
+			<Media src={workMedia(work.id, data.cover)} alt={data.title} class="cover" />
+		</div>
+
+		{data.gallery.length > 0 && (
+			<div class="gallery">
+				{data.gallery.map((file, i) => (
+					<Media src={workMedia(work.id, file)} alt={`${data.title}, image ${i + 1}`} class="shot" />
+				))}
+			</div>
+		)}
+
+		<nav class="pager mono" aria-label="More works">
+			{prev ? <a href={`${base}works/${prev.id}/`}>Previous: {prev.data.title}</a> : <span />}
+			{next && <a href={`${base}works/${next.id}/`}>Next: {next.data.title}</a>}
+		</nav>
+	</article>
+</Layout>
+
+<style>
+	article {
+		padding: 0.6rem var(--gutter) 0;
+	}
+	.intro {
+		display: grid;
+		gap: 1.5rem;
+	}
+	h1 {
+		font-size: clamp(2.4rem, 5.6vw, 4.4rem);
+		margin-top: 1.5rem;
+	}
+	.body {
+		font-size: 1rem;
+		max-width: 30em;
+		margin: 1.75rem 0 2.5rem;
+	}
+	.body :global(p) {
+		margin: 0 0 1em;
+	}
+	dl {
+		margin: 0;
+	}
+	dl div {
+		border-top: 1.5px solid var(--orange);
+		padding: 0.6rem 0 0.9rem;
+	}
+	dt {
+		font-size: 0.65rem;
+		margin-bottom: 0.2rem;
+	}
+	dd {
+		margin: 0;
+		font-size: 0.9rem;
+	}
+	.intro :global(.cover) {
+		width: 100%;
+		aspect-ratio: 4 / 5;
+		height: auto;
+	}
+	.gallery {
+		display: grid;
+		gap: var(--gutter);
+		margin-top: var(--gutter);
+	}
+	.gallery :global(.shot) {
+		width: 100%;
+		aspect-ratio: 4 / 3;
+		height: auto;
+	}
+	.pager {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		flex-wrap: wrap;
+		margin-top: 2.5rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+	}
+	.pager a {
+		color: var(--orange);
+		text-decoration: none;
+	}
+	.pager a:hover {
+		text-decoration: underline;
+	}
+
+	@media (min-width: 900px) {
+		.intro {
+			grid-template-columns: 45% 1fr;
+			gap: 2.5rem;
+		}
+		.text {
+			padding-right: 1rem;
+		}
+		.gallery {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+</style>

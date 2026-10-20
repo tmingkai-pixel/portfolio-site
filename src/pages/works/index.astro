@@ -1,0 +1,147 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Media from "../../components/Media.astro";
+import { getWorks, workMedia } from "../../lib/works";
+import { categories } from "../../lib/categories";
+
+const base = import.meta.env.BASE_URL;
+const works = await getWorks();
+const filters = ["All", ...categories];
+---
+
+<Layout title="Works">
+	<div class="works">
+		<div class="filters" role="group" aria-label="Filter by category">
+			{filters.map((f) => (
+				<button type="button" class="filter mono" data-filter={f} aria-pressed={f === "All" ? "true" : "false"}>
+					{f}
+				</button>
+			))}
+		</div>
+
+		<ol class="list">
+			{works.map((work, i) => (
+				<li data-category={work.data.category}>
+					<a href={`${base}works/${work.id}/`}>
+						<span class="num mono">{String(i + 1).padStart(2, "0")}</span>
+						<span class="title display">
+							{work.data.title}
+							{work.data.draft && <span class="draft mono">Draft</span>}
+						</span>
+						<Media src={workMedia(work.id, work.data.cover)} alt="" class="thumb" />
+					</a>
+				</li>
+			))}
+		</ol>
+
+		<p class="empty" data-empty hidden>Nothing here yet. Check back soon.</p>
+	</div>
+</Layout>
+
+<style>
+	.works {
+		padding: 1.25rem var(--gutter) 0;
+	}
+	.filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin-bottom: 1.75rem;
+	}
+	.filter {
+		font-size: 0.7rem;
+		font-weight: 700;
+		color: var(--orange);
+		background: transparent;
+		border: 1.5px solid var(--orange);
+		border-radius: 999px;
+		padding: 0.3rem 0.85rem;
+		cursor: pointer;
+	}
+	.filter[aria-pressed="true"] {
+		background: var(--orange);
+		color: var(--navy);
+	}
+	.list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.list li + li {
+		margin-top: 0.6rem;
+	}
+	.list a {
+		display: grid;
+		grid-template-columns: 2.4rem 1fr auto;
+		align-items: start;
+		gap: 0.5rem;
+		text-decoration: none;
+	}
+	.num {
+		color: var(--orange);
+		font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+		font-weight: 600;
+		padding-top: 0.25em;
+	}
+	.title {
+		font-size: clamp(2rem, 6.4vw, 4.2rem);
+		line-height: 0.92;
+		transition: color 0.15s ease;
+	}
+	.list a:hover .title {
+		color: var(--navy);
+	}
+	.draft {
+		font-size: 0.75rem;
+		letter-spacing: 0;
+		vertical-align: middle;
+		color: var(--navy);
+		border: 1px dashed var(--navy);
+		border-radius: 999px;
+		padding: 0.1rem 0.5rem;
+	}
+	.list a :global(.thumb) {
+		width: clamp(60px, 12vw, 130px);
+		height: clamp(45px, 9vw, 95px);
+		min-height: 0;
+	}
+	.list a :global(.placeholder.thumb span) {
+		display: none;
+	}
+	.empty {
+		color: var(--orange);
+		font-size: 1.25rem;
+	}
+</style>
+
+<script>
+	const buttons = [...document.querySelectorAll<HTMLButtonElement>("[data-filter]")];
+	const items = [...document.querySelectorAll<HTMLElement>("[data-category]")];
+	const empty = document.querySelector<HTMLElement>("[data-empty]")!;
+
+	function apply(filter: string) {
+		let shown = 0;
+		for (const item of items) {
+			const match = filter === "All" || item.dataset.category === filter;
+			item.hidden = !match;
+			if (match) shown++;
+		}
+		for (const b of buttons) b.setAttribute("aria-pressed", String(b.dataset.filter === filter));
+		empty.hidden = shown > 0;
+	}
+
+	for (const b of buttons) {
+		b.addEventListener("click", () => {
+			const filter = b.dataset.filter!;
+			apply(filter);
+			const url = new URL(location.href);
+			if (filter === "All") url.searchParams.delete("category");
+			else url.searchParams.set("category", filter);
+			history.replaceState(null, "", url);
+		});
+	}
+
+	// Allow linking straight to a category, e.g. /works/?category=3D%20Printing
+	const initial = new URLSearchParams(location.search).get("category");
+	if (initial && buttons.some((b) => b.dataset.filter === initial)) apply(initial);
+</script>
