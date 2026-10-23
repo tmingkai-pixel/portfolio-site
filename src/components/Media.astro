@@ -13,9 +13,13 @@ interface Props {
 	class?: string;
 	/** Video only: play muted on loop like a GIF (default true) */
 	ambient?: boolean;
+	/** Video only: has a soundtrack worth hearing, so show a "Sound on" button */
+	sound?: boolean;
+	/** Image only: load immediately instead of when scrolled near (use for the top image) */
+	eager?: boolean;
 }
 
-const { src, alt = "", class: className, ambient = true } = Astro.props;
+const { src, alt = "", class: className, ambient = true, sound = false, eager = false } = Astro.props;
 const exists = fs.existsSync(path.join(process.cwd(), "public", "media", src));
 const url = `${import.meta.env.BASE_URL}media/${src}`;
 const isVideo = /\.(mp4|webm|mov)$/i.test(src);
@@ -26,13 +30,18 @@ const isVideo = /\.(mp4|webm|mov)$/i.test(src);
 		<span class="mono">media/{src}</span>
 	</div>
 ) : isVideo ? (
-	ambient ? (
-		<video class={className} src={url} autoplay muted loop playsinline aria-label={alt} />
+	ambient && sound ? (
+		<div class:list={["sound-wrap", className]}>
+			<video src={url} data-ambient muted loop playsinline preload="metadata" aria-label={alt} />
+			<button type="button" class="sound-toggle mono" data-sound-toggle aria-pressed="false">Sound on</button>
+		</div>
+	) : ambient ? (
+		<video class={className} src={url} data-ambient muted loop playsinline preload="metadata" aria-label={alt} />
 	) : (
 		<video class={className} src={url} controls playsinline aria-label={alt} />
 	)
 ) : (
-	<img class={className} src={url} alt={alt} loading="lazy" decoding="async" />
+	<img class={className} src={url} alt={alt} loading={eager ? "eager" : "lazy"} decoding="async" />
 )}
 
 <style>
@@ -49,5 +58,29 @@ const isVideo = /\.(mp4|webm|mov)$/i.test(src);
 	img,
 	video {
 		object-fit: cover;
+	}
+	/* Reserve a square until the real size is known, so lazy images aren't 0px tall */
+	img {
+		aspect-ratio: auto 1 / 1;
+	}
+	.sound-wrap {
+		position: relative;
+	}
+	.sound-wrap video {
+		width: 100%;
+		height: auto;
+	}
+	.sound-toggle {
+		position: absolute;
+		right: 0.6rem;
+		bottom: 0.6rem;
+		background: var(--orange);
+		color: var(--navy);
+		border: 0;
+		border-radius: 999px;
+		font-size: 0.65rem;
+		font-weight: 700;
+		padding: 0.3rem 0.7rem;
+		cursor: pointer;
 	}
 </style>

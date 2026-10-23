@@ -21,6 +21,8 @@ const works = defineCollection({
 		cover: z.string().default("cover.jpg"),
 		/** Files in public/media/works/<file name>/, shown in a grid */
 		gallery: z.array(z.string()).default([]),
+		/** Videos (from cover/gallery) with a soundtrack: they get a "Sound on" button */
+		sound: z.array(z.string()).default([]),
 		/** Drafts show up in `npm run dev` but not on the live site */
 		draft: z.boolean().default(false),
 	}),

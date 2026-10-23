@@ -41,13 +41,13 @@ const details = [
 					))}
 				</dl>
 			</div>
-			<Media src={workMedia(work.id, data.cover)} alt={data.title} class="cover" />
+			<Media src={workMedia(work.id, data.cover)} alt={data.title} class="cover" sound={data.sound.includes(data.cover)} eager />
 		</div>
 
 		{data.gallery.length > 0 && (
 			<div class="gallery">
 				{data.gallery.map((file, i) => (
-					<Media src={workMedia(work.id, file)} alt={`${data.title}, image ${i + 1}`} class="shot" />
+					<Media src={workMedia(work.id, file)} alt={`${data.title}, image ${i + 1}`} class="shot" sound={data.sound.includes(file)} />
 				))}
 			</div>
 		)}
@@ -96,18 +96,20 @@ const details = [
 	}
 	.intro :global(.cover) {
 		width: 100%;
-		aspect-ratio: 4 / 5;
 		height: auto;
+		align-self: start;
 	}
+	/* Masonry-style columns so every image keeps its own shape */
 	.gallery {
-		display: grid;
-		gap: var(--gutter);
+		columns: 1;
+		column-gap: var(--gutter);
 		margin-top: var(--gutter);
 	}
 	.gallery :global(.shot) {
 		width: 100%;
-		aspect-ratio: 4 / 3;
 		height: auto;
+		break-inside: avoid;
+		margin-bottom: var(--gutter);
 	}
 	.pager {
 		display: flex;
@@ -135,7 +137,7 @@ const details = [
 			padding-right: 1rem;
 		}
 		.gallery {
-			grid-template-columns: 1fr 1fr;
+			columns: 2;
 		}
 	}
 </style>

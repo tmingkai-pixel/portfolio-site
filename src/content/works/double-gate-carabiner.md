@@ -1,0 +1,12 @@
+---
+title: Double Gate Carabiner
+order: 7
+category: 3D Printing
+summary: A figure-eight carabiner with a gate on each loop.
+role: 3D Modelling, 3D Printing, Rendering
+date: "2026"
+cover: untitled.jpg
+gallery: [top-down.jpg]
+---
+
+A figure-eight carabiner with a gate on each loop, so two things can be clipped on and off independently.

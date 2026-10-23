@@ -29,5 +29,39 @@ const {
 			<slot />
 		</main>
 		<Footer />
+		<script>
+			// Ambient videos only load and play while on screen
+			const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+			const observer = new IntersectionObserver((entries) => {
+				for (const { target, isIntersecting } of entries) {
+					const video = target as HTMLVideoElement;
+					if (isIntersecting && !reduceMotion) video.play().catch(() => {});
+					else video.pause();
+				}
+			}, { rootMargin: "200px" });
+			for (const video of document.querySelectorAll("video[data-ambient]")) {
+				observer.observe(video);
+			}
+
+			// "Sound on" buttons: unmute one video at a time
+			const toggles = [...document.querySelectorAll<HTMLButtonElement>("[data-sound-toggle]")];
+			for (const button of toggles) {
+				button.addEventListener("click", () => {
+					const turnOn = button.getAttribute("aria-pressed") !== "true";
+					for (const other of toggles) {
+						other.setAttribute("aria-pressed", "false");
+						other.textContent = "Sound on";
+						(other.previousElementSibling as HTMLVideoElement).muted = true;
+					}
+					if (turnOn) {
+						const video = button.previousElementSibling as HTMLVideoElement;
+						video.muted = false;
+						video.play().catch(() => {});
+						button.setAttribute("aria-pressed", "true");
+						button.textContent = "Sound off";
+					}
+				});
+			}
+		</script>
 	</body>
 </html>

@@ -9,13 +9,12 @@ the site shows a grey box labelled with the path it's waiting for.
 
 ## Works (one folder per project, named after its file in src/content/works/)
 - `public/media/works/<project>/cover.jpg` — thumbnail and main image
-  (One Thing A Day uses `cover.mp4` instead)
-- `public/media/works/<project>/01.jpg`, `02.jpg`, … — gallery photos
-  (the list of gallery files is in each project's `gallery:` line)
+- any other photos/videos in the same folder, listed in the project's `gallery:` line
+  (the `cover:` line picks which file is the thumbnail)
 
 Tips: export photos as JPG around 2000px on the long edge, and keep videos
 short, muted and under ~10 MB so pages load quickly.
 
 ## Adding a 3D printing project
-Copy `src/content/works/example-3d-print.md`, rename it, fill it in, and delete
-`draft: true`. Drafts appear in `npm run dev` but not on the live site.
+Copy `src/content/works/_template.md`, rename it without the underscore, fill it in,
+and delete `draft: true`. Drafts appear in `npm run dev` but not on the live site.
