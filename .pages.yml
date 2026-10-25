@@ -136,6 +136,123 @@ content:
           https://tmingkai-pixel.github.io/portfolio-site/works/<file name>/ (about a minute after saving).
           Untick and save to publish.
 
+  - name: home-page
+    label: Home page
+    type: file
+    path: src/data/home.json
+    format: json
+    fields:
+      - name: headline
+        label: Headline
+        type: text
+        required: true
+        description: The big orange title. Press Enter where you want the line to break.
+      - name: byline
+        label: Byline
+        type: string
+        description: Small text under the headline, e.g. "By Tan Ming-Kai".
+      - name: heroMedia
+        label: Hero slideshow
+        type: file
+        description: Videos or images in the box at the top right. Visitors can flip through them with the arrows.
+        options:
+          path: public/media/home
+          categories: [image, video]
+          multiple: true
+      - name: bio
+        label: Bio paragraphs
+        type: text
+        list: true
+        description: The orange text on the navy band. Put *asterisks* around words to show them in white, e.g. "with *5 years* in".
+
+  - name: about-page
+    label: About page
+    type: file
+    path: src/data/about.json
+    format: json
+    fields:
+      - name: portrait
+        label: Portrait photo
+        type: file
+        description: Your photo on the navy card. A portrait-shaped JPG under 3 MB works best.
+        options:
+          path: public/media/about
+          categories: [image]
+      - name: name
+        label: Name
+        type: string
+        required: true
+      - name: intro
+        label: Intro
+        type: text
+        description: The orange text on the navy card.
+      - name: email
+        label: Contact email
+        type: string
+        description: Used by the "Contact Me" button.
+      - name: linkedin
+        label: LinkedIn link
+        type: string
+        description: Full address, starting with https://
+      - name: techSkills
+        label: Tech skills
+        type: string
+        list: true
+      - name: softSkills
+        label: Soft skills
+        type: string
+        list: true
+      - name: education
+        label: Education
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{title}"
+        fields:
+          - name: title
+            label: Qualification
+            type: string
+            required: true
+          - name: where
+            label: School
+            type: string
+          - name: when
+            label: Years
+            type: string
+            description: e.g. "2024 - 2027"
+      - name: experience
+        label: Professional experience
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{title}"
+        fields:
+          - name: title
+            label: Job title
+            type: string
+            required: true
+          - name: roles
+            label: Places
+            type: object
+            description: One or more places you did this job, each with its own dates and bullet points.
+            list:
+              collapsible:
+                collapsed: true
+                summary: "{where}"
+            fields:
+              - name: where
+                label: Company
+                type: string
+              - name: when
+                label: Years
+                type: string
+              - name: points
+                label: Bullet points
+                type: text
+                list: true
+
   - name: works-order
     label: Works order
     type: file

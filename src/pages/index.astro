@@ -1,19 +1,28 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Media from "../components/Media.astro";
-import { getWorks, workMedia } from "../lib/works";
+import { getWorks, workMedia, mediaPath } from "../lib/works";
+import home from "../data/home.json";
 
 const base = import.meta.env.BASE_URL;
 const works = await getWorks();
 
-// Hero slideshow: files in public/media/home/
-const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
+// Text and hero videos are edited in Pages CMS ("Home page" → src/data/home.json)
+const headlineLines = (home.headline ?? "").split(/\r?\n/).filter(Boolean);
+const heroSlides = (home.heroMedia ?? []).filter(Boolean).map(mediaPath);
+
+// Bio: *words in asterisks* are shown in white
+const escapeHtml = (text: string) =>
+	text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const bio = (home.bio ?? []).filter(Boolean).map((paragraph: string) =>
+	escapeHtml(paragraph).replace(/\*\*?([^*]+?)\*\*?/g, "<em>$1</em>"),
+);
 ---
 
 <Layout title="Home">
 	<section class="hero">
-		<h1 class="display">Design Driven<br />by Purpose</h1>
-		<p class="byline mono">By Tan Ming-Kai</p>
+		<h1 class="display">{headlineLines.map((line, i) => (<>{i > 0 && <br />}{line}</>))}</h1>
+		<p class="byline mono">{home.byline}</p>
 
 		<div class="slideshow" data-slideshow>
 			{heroSlides.map((src, i) => (
@@ -31,9 +40,7 @@ const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
 	</section>
 
 	<section class="bio">
-		<p data-reveal>Hands-on experience in 3D printing and general crafting with <em>5 years</em> in the cardboard craft and structural/sculptural events industry.</p>
-		<p data-reveal>Practiced at typography, publication design and advertising with my <em>Communication Design Diploma</em> at Temasek Polytechnic.</p>
-		<p data-reveal>My <em>Computer Science Degree</em> at SUSS complements my making background with a technical foundation useful for electronics, IT workshops, or CAD/design instruction.</p>
+		{bio.map((paragraph) => <p data-reveal set:html={paragraph} />)}
 	</section>
 
 	<section class="gallery" aria-label="Selected works">

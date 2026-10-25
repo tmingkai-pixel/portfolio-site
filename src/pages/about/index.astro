@@ -2,61 +2,18 @@
 import Layout from "../../layouts/Layout.astro";
 import Media from "../../components/Media.astro";
 
-const contact = {
-	email: "tmingkai2@gmail.com",
-	linkedin: "https://www.linkedin.com/in/mingkaitan/",
-};
+import { mediaPath } from "../../lib/works";
+import about from "../../data/about.json";
 
-const techSkills = ["Adobe Suite", "Rhinoceros 3D", "Nomad Sculpt", "Blender", "Google Analytics"];
-const softSkills = ["Project Management", "Problem solving", "Excellent communicator", "Leadership"];
-
-const education = [
-	{ title: "Degree in Computer Sciences", where: "Singapore University of Social Sciences", when: "2024 - 2027" },
-	{ title: "Post-Diploma in Creative Content Creation", where: "Nanyang Polytechnic", when: "2020 - 2021" },
-	{ title: "Diploma in Communication Design", where: "Temasek Polytechnic", when: "2017 - 2020" },
-];
-
-const experience = [
-	{
-		title: "Graphics Communications Executive",
-		roles: [
-			{
-				where: "Paper Carpenter",
-				when: "2019 - 2024",
-				points: [
-					"Ran social media accounts and marketing",
-					"Managed websites in both design and administration",
-					"Designed and executed events projects from start to end product",
-					"Designed product packaging and associated social media marketing campaigns",
-					"Managed company branding",
-					"Developed new brand identity of subsidiary companies",
-					"Product photographer and videographer for various media",
-				],
-			},
-		],
-	},
-	{
-		title: "Freelance Graphic Designer",
-		roles: [
-			{
-				where: "Generation X Events",
-				when: "2016 - 2017",
-				points: [
-					"Responsible for designing print and digital graphic content for social events for companies such as Samsung and Hyundai",
-					"Liaised directly with company representatives and vendors",
-				],
-			},
-			{
-				where: "Takashimaya Singapore",
-				when: "2019",
-				points: [
-					"Part of a team of 3 responsible for creating designs for advertising in both print and digital media",
-					"Liaised between departments for logistics and administration",
-				],
-			},
-		],
-	},
-];
+// All text here is edited in Pages CMS ("About page" → src/data/about.json)
+const { name, intro, email, linkedin } = about;
+const techSkills = (about.techSkills ?? []).filter(Boolean);
+const softSkills = (about.softSkills ?? []).filter(Boolean);
+const education = about.education ?? [];
+const experience = (about.experience ?? []).map((job) => ({
+	...job,
+	roles: (job.roles ?? []).map((role) => ({ ...role, points: (role.points ?? []).filter(Boolean) })),
+}));
 ---
 
 <Layout title="About" description="Tan Ming-Kai — graphic designer with 5+ years of experience, now studying Computer Science at SUSS.">
@@ -65,17 +22,14 @@ const experience = [
 			<h1 class="display">About</h1>
 
 			<div class="card">
-				<Media src="about/portrait.jpg" alt="Portrait of Tan Ming-Kai" class="portrait" eager />
-				<h2 class="name mono">Tan Ming-Kai</h2>
-				<p class="intro">
-					A graphic designer with 5+ years of experience working with and managing
-					design projects from conceptualisation to finished product.
-				</p>
+				<Media src={mediaPath(about.portrait || "/media/about/portrait.jpg")} alt={`Portrait of ${name}`} class="portrait" eager />
+				<h2 class="name mono">{name}</h2>
+				<p class="intro">{intro}</p>
 			</div>
 
 			<div class="links">
-				<a class="pill" href={`mailto:${contact.email}?subject=Hello!`}>Contact Me</a>
-				<a class="pill" href={contact.linkedin} target="_blank" rel="noopener">LinkedIn</a>
+				<a class="pill" href={`mailto:${email}?subject=Hello!`}>Contact Me</a>
+				<a class="pill" href={linkedin} target="_blank" rel="noopener">LinkedIn</a>
 			</div>
 
 			<div class="skills">

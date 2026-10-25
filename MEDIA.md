@@ -32,6 +32,12 @@ and delete `draft: true` when it's ready.
 
 Every save is recorded on GitHub, so any mistake can be undone.
 
+### Editing the Home and About pages
+- **Home page** (Pages CMS sidebar): headline, byline, hero slideshow videos and
+  the bio paragraphs. Put *asterisks* around words to show them in white.
+- **About page**: portrait, name, intro, contact email, LinkedIn, skills,
+  education and work experience. Drag items to reorder them.
+
 ### Changing the order of projects
 Click **Works order** in the Pages CMS sidebar, drag projects up or down, and
 **Save**. This sets the order on the Works page and the home page gallery.

@@ -39,3 +39,6 @@ export async function getWorks() {
  */
 export const workMedia = (id: string, file: string) =>
 	file.startsWith("/media/") ? file.slice("/media/".length) : `works/${id}/${file}`;
+
+/** Path inside public/media/ for a "/media/..." path from a content file */
+export const mediaPath = (file: string) => file.replace(/^\/?media\//, "");
