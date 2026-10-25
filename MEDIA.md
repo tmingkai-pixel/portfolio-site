@@ -39,7 +39,7 @@ Every save is recorded on GitHub, so any mistake can be undone.
   education and work experience. Drag items to reorder them.
 
 ### Changing the order of projects
-Click **Works order** in the Pages CMS sidebar, drag projects up or down, and
+Click **Works → Order** in the Pages CMS sidebar, drag projects up or down, and
 **Save**. This sets the order on the Works page and the home page gallery.
 A new project you haven't placed yet appears at the end automatically.
 

@@ -13,128 +13,151 @@ media:
   rename: safe
 
 content:
-  - name: works
+  - name: works-group
     label: Works
-    type: collection
-    path: src/content/works
-    format: yaml-frontmatter
-    exclude: [_template.md]
-    filename:
-      template: "{title}.md"
-      field: false
-    view:
-      fields: [title, category]
-      primary: title
-      sort: [title]
-      default:
-        sort: title
-        order: asc
-    fields:
-      - name: title
-        label: Title
-        type: string
-        required: true
-      - name: category
-        label: Category
-        type: select
-        required: true
-        options:
-          values: [Commercial Work, Personal Work, 3D Printing]
-      - name: summary
-        label: Short summary
-        type: text
-        required: true
-        description: One or two sentences, used for link previews.
-      - name: body
-        label: Description
-        type: rich-text
-        description: The main text on the project page.
-      - name: role
-        label: Role
-        type: string
-        required: true
-        description: e.g. "3D Modelling, 3D Printing, Rendering"
-      - name: date
-        label: Date
-        type: string
-        required: true
-        description: Written as you want it shown, e.g. "2026" or "6 October 2023".
-      - name: projectType
-        label: Project type (optional)
-        type: string
-        description: Shown on the project page instead of the category, e.g. "Internal Company Project". Leave blank to use the category.
-      - name: doneUnder
-        label: Done under
-        type: string
-        description: Company or client, if any. Leave blank to hide.
-      - name: cover
-        label: Cover image or video
-        type: file
-        required: true
-        description: Thumbnail on the Works list and the main image on the project page.
-        options:
-          path: public/media/works
-          categories: [image, video]
-      - name: template
-        label: Template
-        type: select
-        description: >-
-          Standard = one photo grid (uses Gallery below).
-          Tabs = a tab for each piece, each with its own photos (uses Pieces below), like One Thing A Day.
-          Leave empty for Standard.
-        options:
-          values:
-            - name: standard
-              label: Standard
-            - name: tabs
-              label: Tabs
-      - name: gallery
-        label: Gallery (Standard template)
-        type: file
-        description: Photos and videos shown in a grid. Please upload JPGs under 3 MB each (bigger files fail to upload).
-        options:
-          path: public/media/works
-          categories: [image, video]
-          multiple: true
-      - name: pieces
-        label: Pieces (Tabs template)
-        type: object
-        description: Each piece becomes a tab on the project page. Drag to reorder.
-        list:
-          collapsible:
-            collapsed: true
-            summary: "{title}"
+    type: group
+    items:
+      - name: works
+        label: Projects
+        type: collection
+        path: src/content/works
+        format: yaml-frontmatter
+        exclude: [_template.md]
+        filename:
+          template: "{title}.md"
+          field: false
+        view:
+          fields: [title, category]
+          primary: title
+          sort: [title]
+          default:
+            sort: title
+            order: asc
         fields:
           - name: title
-            label: Tab name
+            label: Title
             type: string
             required: true
-          - name: caption
-            label: Caption (optional)
+          - name: category
+            label: Category
+            type: select
+            required: true
+            options:
+              values: [Commercial Work, Personal Work, 3D Printing]
+          - name: summary
+            label: Short summary
             type: text
-            description: A sentence or two shown above this piece's photos.
-          - name: media
-            label: Photos and videos
+            required: true
+            description: One or two sentences, used for link previews.
+          - name: body
+            label: Description
+            type: rich-text
+            description: The main text on the project page.
+          - name: role
+            label: Role
+            type: string
+            required: true
+            description: e.g. "3D Modelling, 3D Printing, Rendering"
+          - name: date
+            label: Date
+            type: string
+            required: true
+            description: Written as you want it shown, e.g. "2026" or "6 October 2023".
+          - name: projectType
+            label: Project type (optional)
+            type: string
+            description: Shown on the project page instead of the category, e.g. "Internal Company Project". Leave blank to use the category.
+          - name: doneUnder
+            label: Done under
+            type: string
+            description: Company or client, if any. Leave blank to hide.
+          - name: cover
+            label: Cover image or video
             type: file
+            required: true
+            description: Thumbnail on the Works list and the main image on the project page.
+            options:
+              path: public/media/works
+              categories: [image, video]
+          - name: template
+            label: Template
+            type: select
+            description: >-
+              Standard = one photo grid (uses Gallery below).
+              Tabs = a tab for each piece, each with its own photos (uses Pieces below), like One Thing A Day.
+              Leave empty for Standard.
+            options:
+              values:
+                - name: standard
+                  label: Standard
+                - name: tabs
+                  label: Tabs
+          - name: gallery
+            label: Gallery (Standard template)
+            type: file
+            description: Photos and videos shown in a grid. Please upload JPGs under 3 MB each (bigger files fail to upload).
             options:
               path: public/media/works
               categories: [image, video]
               multiple: true
-      - name: sound
-        label: Videos with sound
+          - name: pieces
+            label: Pieces (Tabs template)
+            type: object
+            description: Each piece becomes a tab on the project page. Drag to reorder.
+            list:
+              collapsible:
+                collapsed: true
+                summary: "{title}"
+            fields:
+              - name: title
+                label: Tab name
+                type: string
+                required: true
+              - name: caption
+                label: Caption (optional)
+                type: text
+                description: A sentence or two shown above this piece's photos.
+              - name: media
+                label: Photos and videos
+                type: file
+                options:
+                  path: public/media/works
+                  categories: [image, video]
+                  multiple: true
+          - name: sound
+            label: Videos with sound
+            type: file
+            description: Pick any videos above that have audio worth hearing; they get a "Sound on" button.
+            options:
+              path: public/media/works
+              categories: [video]
+              multiple: true
+          - name: draft
+            label: Draft (preview before publishing)
+            type: boolean
+            description: >-
+              While ticked, the project isn't listed on the site, but its page still exists so you can check it at
+              https://tmingkai-pixel.github.io/portfolio-site/works/<file name>/ (about a minute after saving).
+              Untick and save to publish.
+
+      - name: works-order
+        label: Order
         type: file
-        description: Pick any videos above that have audio worth hearing; they get a "Sound on" button.
-        options:
-          path: public/media/works
-          categories: [video]
-          multiple: true
-      - name: draft
-        label: Draft (preview before publishing)
-        type: boolean
-        description: >-
-          While ticked, the project isn't listed on the site, but its page still exists so you can check it at
-          https://tmingkai-pixel.github.io/portfolio-site/works/<file name>/ (about a minute after saving).
-          Untick and save to publish.
+        path: src/data/works-order.json
+        format: json
+        fields:
+          - name: works
+            label: Projects (drag to reorder)
+            type: reference
+            list: true
+            description: >-
+              The order projects appear on the Works page and the home page gallery.
+              Drag to reorder, then Save. New projects you haven't placed here are
+              added at the end automatically.
+            options:
+              collection: works
+              value: "{path}"
+              label: "{title}"
 
   - name: home-page
     label: Home page
@@ -252,22 +275,3 @@ content:
                 label: Bullet points
                 type: text
                 list: true
-
-  - name: works-order
-    label: Works order
-    type: file
-    path: src/data/works-order.json
-    format: json
-    fields:
-      - name: works
-        label: Projects (drag to reorder)
-        type: reference
-        list: true
-        description: >-
-          The order projects appear on the Works page and the home page gallery.
-          Drag to reorder, then Save. New projects you haven't placed here are
-          added at the end automatically.
-        options:
-          collection: works
-          value: "{path}"
-          label: "{title}"
