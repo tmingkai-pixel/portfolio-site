@@ -32,7 +32,9 @@ const isCurrent = (href: string) =>
 <style>
 	/* Sizes measured from the Wix site; desktop sizes scale with page width */
 	nav {
+		/* Stay above the home headline, whose tall letters reach up behind the bar */
 		position: relative;
+		z-index: 10;
 		background: var(--navy);
 		height: 2.81vw;
 		display: flex;
