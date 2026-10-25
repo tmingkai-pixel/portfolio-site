@@ -27,42 +27,39 @@ pieces:
   - title: 004-Painted Kettle
     media:
       - /media/works/one-thing-a-day/kettle.mp4
-  - title: Braun Coffee Maker
+  - title: 005-Braun Coffee Maker
     media:
       - /media/works/one-thing-a-day/perspective-hero-shot.jpg
-  - title: Sound Design 2
+  - title: 006-Braun Combiscope
     media:
       - /media/works/one-thing-a-day/audio-2.mp4
-  - title: "bedroom "
-  - title: Front Door
+  - title: 007-Bedroom Isometric
+  - title: 008-Front Door Isometric
     media:
       - /media/works/one-thing-a-day/front-door-animated.mp4
-  - title: Animation 3
+  - title: 009-Living Room Isometric
     media:
       - /media/works/one-thing-a-day/animation-3.mp4
-  - title: Gantz Room
+  - title: 010-Gantz Room Isometric
     media:
       - /media/works/one-thing-a-day/gantz-room.jpg
-  - title: Sound Design 1
-    media:
-      - /media/works/one-thing-a-day/audio.mp4
-  - title: nomad sculpting experimentation
-  - title: Candies
+  - title: 011-Nomad Sculpting Experimentation
+  - title: 012-Falling Candies
     media:
       - /media/works/one-thing-a-day/candies.mp4
-  - title: Animation 2
+  - title: 013-Post Poo Drops
     media:
       - /media/works/one-thing-a-day/animation-2.mp4
-  - title: Glue
+  - title: 014-Glue
     media:
       - /media/works/one-thing-a-day/glue.mp4
-  - title: Measuring Tape
+  - title: 015-Measuring Tape
     media:
       - /media/works/one-thing-a-day/measuring-tape.mp4
-  - title: Tiny Jeep
+  - title: 016-Tiny Jeep
     media:
       - /media/works/one-thing-a-day/tinyjeep2.mp4
-  - title: Bad Outpost
+  - title: 017-Bad Outpost
     media:
       - /media/works/one-thing-a-day/bad-outpost.jpg
 ---
