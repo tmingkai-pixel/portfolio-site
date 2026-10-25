@@ -55,6 +55,10 @@ pieces:
       - /media/works/one-thing-a-day/braun combiscope/combiscope-3.jpg
       - /media/works/one-thing-a-day/braun combiscope/combiscope-1.jpg
   - title: 007-Bedroom Isometric
+    caption: My first attempt at a isometric room design, back when I was still
+      trying to get these done in an hour
+    media:
+      - /media/works/one-thing-a-day/bedroom/bedroom-1.jpg
   - title: 008-Front Door Isometric
     caption: I was watching modern family while i was putting this together so it
       might be a little inspired by the Dunphy's house
