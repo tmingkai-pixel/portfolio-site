@@ -99,8 +99,8 @@ pieces:
     caption: Trying my hand at the trendy low poly, PS1/PS2 graphic style. These are
       the post poo drops I have in my bathroom.
     media:
-      - /media/works/one-thing-a-day/post poo drops/post-poo-drops.mp4
       - /media/works/one-thing-a-day/post poo drops/post-poo-drops-1.jpg
+      - /media/works/one-thing-a-day/post poo drops/post-poo-drops-2.mp4
   - title: 014-Glue
     caption: A can of old Dunlop contact adhesive I had. I took the opportunity to
       experiment with a low poly high viscosity fluid.
