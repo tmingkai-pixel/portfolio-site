@@ -6,7 +6,7 @@ summary: A lightweight, recyclable cardboard picnic table made for outdoor adven
 role: Ideation, Product Design, Print, Product/Lifestyle Photography
 date: June 2022
 doneUnder: Paper Carpenter
-cover: /media/works/pappy-freedom-table/cover.jpg
+cover: /media/works/pappy freedom table/pxl20220618072242293.jpg
 gallery:
   - /media/works/pappy freedom table/6202018829844989591-1.jpg
   - /media/works/pappy freedom table/pxl20230804073957611mp.jpg
