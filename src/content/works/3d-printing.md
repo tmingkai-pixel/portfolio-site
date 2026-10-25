@@ -1,7 +1,7 @@
 ---
 title: 3D Printing
 category: 3D Printing
-summary: "A Selection of my favourite 3D printing projects, each purpose built
+summary: "A selection of my favourite 3D printing projects, each purpose built
   to solve a specific daily problem. "
 role: 3D Modelling, Animation, Sound Design, Printing
 date: Open
@@ -43,4 +43,4 @@ pieces:
       - /media/works/3d printing/joycon adapter/image-2.jpg
 draft: false
 ---
-A Selection of my favourite 3D printing projects, each purpose built to solve a specific daily problem. 
+A selection of my favourite 3D printing projects, each purpose built to solve a specific daily problem. 
