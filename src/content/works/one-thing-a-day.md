@@ -21,7 +21,7 @@ pieces:
   - title: 002-Scanner
     media:
       - /media/works/one-thing-a-day/animation.mp4
-  - title: It's Never an Hour
+  - title: 003_Music Player
     media:
       - /media/works/one-thing-a-day/itsneveranhour.mp4
   - title: Kettle
@@ -46,30 +46,24 @@ pieces:
   - title: Sound Design 1
     media:
       - /media/works/one-thing-a-day/audio.mp4
-  - title: Upset Frog
-    media:
-      - /media/works/one-thing-a-day/upset-frog.jpg
+  - title: nomad sculpting experimentation
   - title: Candies
     media:
       - /media/works/one-thing-a-day/candies.mp4
-  - title: Bad Outpost
-    media:
-      - /media/works/one-thing-a-day/bad-outpost.jpg
-  - title: Glue
-    media:
-      - /media/works/one-thing-a-day/glue.mp4
-  - title: Screaming Behelit
-    media:
-      - /media/works/one-thing-a-day/screaming-behalit-beserk.jpg
-  - title: Tiny Jeep
-    media:
-      - /media/works/one-thing-a-day/tinyjeep2.mp4
-  - title: Measuring Tape
-    media:
-      - /media/works/one-thing-a-day/measuring-tape.mp4
   - title: Animation 2
     media:
       - /media/works/one-thing-a-day/animation-2.mp4
-  - title: nomad sculpting experimentation
+  - title: Glue
+    media:
+      - /media/works/one-thing-a-day/glue.mp4
+  - title: Measuring Tape
+    media:
+      - /media/works/one-thing-a-day/measuring-tape.mp4
+  - title: Tiny Jeep
+    media:
+      - /media/works/one-thing-a-day/tinyjeep2.mp4
+  - title: Bad Outpost
+    media:
+      - /media/works/one-thing-a-day/bad-outpost.jpg
 ---
 A body of work I've been committed to over the span of almost 3 weeks. I aim to create something everyday - no matter what the subject is. I've explored Nomad Sculpt, Blender and also sound design.
