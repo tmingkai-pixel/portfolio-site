@@ -57,10 +57,11 @@ const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
 	/* ---------- Hero ---------- */
 	.hero {
 		position: relative;
-		padding: 0.5rem var(--gutter) 2.5rem;
+		--headline: clamp(3rem, 11.5vw, 10.5rem);
+		padding: 2.5rem var(--inset) 3rem;
 	}
 	.hero h1 {
-		font-size: clamp(3.4rem, 15.5vw, 15rem);
+		font-size: var(--headline);
 		margin-left: -0.04em;
 	}
 	.byline {
@@ -105,15 +106,17 @@ const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
 	}
 	@media (min-width: 900px) {
 		.hero {
+			--slide-width: min(28vw, 400px);
+			--slide-top: calc(2.5rem + var(--headline) * 1.25);
 			/* room for the slideshow: its top offset + its height */
-			min-height: calc(24vw + 37vw + 3rem);
+			min-height: calc(var(--slide-top) + var(--slide-width) * 1.085 + 3rem);
 		}
 		/* Overlap the headline like the original */
 		.slideshow {
 			position: absolute;
-			right: 8.5vw;
-			top: 24vw;
-			width: 34vw;
+			right: calc(var(--inset) + 4%);
+			top: var(--slide-top);
+			width: var(--slide-width);
 			max-width: none;
 		}
 	}
@@ -121,11 +124,11 @@ const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
 	/* ---------- Bio ---------- */
 	.bio {
 		background: var(--navy);
-		padding: 3.5rem var(--gutter) 4rem;
+		padding: clamp(3.5rem, 7vw, 6rem) var(--inset);
 	}
 	.bio p {
 		color: var(--orange);
-		font-size: clamp(1.4rem, 3.3vw, 2.6rem);
+		font-size: clamp(1.3rem, 2.6vw, 2.2rem);
 		line-height: 1.2;
 		letter-spacing: -0.02em;
 		max-width: 22em;
@@ -160,15 +163,15 @@ const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
 	/* ---------- Gallery ---------- */
 	.gallery {
 		position: relative;
-		padding: 2.5rem 0 0;
+		padding: clamp(2.5rem, 5vw, 4.5rem) 0 0;
 	}
 	.gallery-track {
 		display: flex;
 		gap: 1rem;
 		overflow-x: auto;
 		scroll-snap-type: x mandatory;
-		scroll-padding: 0 var(--gutter);
-		padding: 0 var(--gutter);
+		scroll-padding: 0 var(--inset);
+		padding: 0 var(--inset);
 		scrollbar-width: none;
 	}
 	.gallery-track::-webkit-scrollbar {
@@ -181,7 +184,7 @@ const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
 		text-decoration: none;
 	}
 	.gallery-item :global(.gallery-media) {
-		height: clamp(280px, 38vw, 480px);
+		height: clamp(260px, 30vw, 420px);
 		width: auto;
 		min-width: 220px;
 	}
@@ -207,7 +210,7 @@ const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
 	}
 	.gallery-next {
 		position: absolute;
-		right: calc(var(--gutter) + 1rem);
+		right: calc(var(--inset) + 1rem);
 		top: 50%;
 		width: 36px;
 		height: 36px;
