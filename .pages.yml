@@ -17,11 +17,11 @@ content:
       template: "{title}.md"
       field: false
     view:
-      fields: [title, category, order]
+      fields: [title, category]
       primary: title
-      sort: [order, title]
+      sort: [title]
       default:
-        sort: order
+        sort: title
         order: asc
     fields:
       - name: title
@@ -34,11 +34,6 @@ content:
         required: true
         options:
           values: [Commercial Work, Personal Work, 3D Printing]
-      - name: order
-        label: Position in list
-        type: number
-        required: true
-        description: Lower numbers show first on the Works page.
       - name: summary
         label: Short summary
         type: text
@@ -134,3 +129,22 @@ content:
           While ticked, the project isn't listed on the site, but its page still exists so you can check it at
           https://tmingkai-pixel.github.io/portfolio-site/works/<file name>/ (about a minute after saving).
           Untick and save to publish.
+
+  - name: works-order
+    label: Works order
+    type: file
+    path: src/data/works-order.json
+    format: json
+    fields:
+      - name: works
+        label: Projects (drag to reorder)
+        type: reference
+        list: true
+        description: >-
+          The order projects appear on the Works page and the home page gallery.
+          Drag to reorder, then Save. New projects you haven't placed here are
+          added at the end automatically.
+        options:
+          collection: works
+          value: "{path}"
+          label: "{title}"

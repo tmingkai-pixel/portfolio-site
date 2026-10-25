@@ -5,7 +5,6 @@
 # at /works/<file name>/ for previewing, but it isn't listed anywhere.
 # Put its photos in public/media/works/<file name>/
 title: Example 3D Print
-order: 5
 category: 3D Printing
 summary: One or two sentences about the print.
 role: 3D Modelling, 3D Printing

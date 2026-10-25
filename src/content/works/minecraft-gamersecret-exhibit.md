@@ -1,7 +1,6 @@
 ---
 title: Minecraft GAMERSECRET Exhibit
 category: Commercial Work
-order: 5
 summary: A life-sized Minecraft diorama streaming set for Gamecode Media Malaysia.
 role: Graphic Design, Product Design
 date: 14 Apr 2023

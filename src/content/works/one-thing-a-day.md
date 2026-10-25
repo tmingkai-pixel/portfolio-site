@@ -1,7 +1,6 @@
 ---
 title: One Thing A Day
 category: Personal Work
-order: 1
 summary: A body of work I've been committed to over the span of almost 3 weeks.
   I aim to create something everyday - no matter what the subject is.
 role: 3D Modelling, Animation, Sound Design

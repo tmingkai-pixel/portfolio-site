@@ -9,8 +9,6 @@ const works = defineCollection({
 	loader: glob({ pattern: "**/[^_]*.md", base: "./src/content/works" }),
 	schema: z.object({
 		title: z.string(),
-		/** Position in lists, lowest first */
-		order: z.number(),
 		category: z.enum(categories),
 		/** One or two sentences for the home page gallery and link previews */
 		summary: z.string(),

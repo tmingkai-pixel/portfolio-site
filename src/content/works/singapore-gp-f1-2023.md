@@ -1,7 +1,6 @@
 ---
 title: Singapore GP F1 2023
 category: Commercial Work
-order: 4
 summary: Cardboard creations built with the PaperConnect™ building system and
   GAIA boards for the race weekend.
 role: Graphic Design, Product Design

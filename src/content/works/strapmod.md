@@ -1,6 +1,5 @@
 ---
 title: StrapMod
-order: 8
 category: 3D Printing
 summary: A clip-on strap mod that adds attachment points to a bag strap.
 role: 3D Modelling, 3D Printing, Rendering

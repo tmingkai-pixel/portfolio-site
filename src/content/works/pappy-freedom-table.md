@@ -1,7 +1,6 @@
 ---
 title: PAPPY Freedom Table
 category: Commercial Work
-order: 1
 summary: A lightweight, recyclable cardboard picnic table made for outdoor adventures.
 role: Ideation, Product Design, Print, Product/Lifestyle Photography
 date: June 2022
