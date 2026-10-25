@@ -71,7 +71,7 @@ const details = [
 
 <style>
 	article {
-		padding: 1rem var(--inset) 0;
+		padding: 0.6rem var(--gutter) 0;
 	}
 	.draft-banner {
 		margin: 0;
@@ -80,14 +80,14 @@ const details = [
 		border-top: 2px dashed var(--orange);
 		font-size: 0.7rem;
 		font-weight: 600;
-		padding: 0.6rem var(--inset);
+		padding: 0.6rem var(--gutter);
 	}
 	.intro {
 		display: grid;
 		gap: 1.5rem;
 	}
 	h1 {
-		font-size: clamp(2.2rem, 4.4vw, 3.6rem);
+		font-size: clamp(2.4rem, 5.6vw, 4.4rem);
 		margin-top: 1.5rem;
 	}
 	.body {
@@ -149,8 +149,8 @@ const details = [
 
 	@media (min-width: 900px) {
 		.intro {
-			grid-template-columns: 42% 1fr;
-			gap: clamp(2.5rem, 5vw, 5rem);
+			grid-template-columns: 45% 1fr;
+			gap: 2.5rem;
 		}
 		.text {
 			padding-right: 1rem;

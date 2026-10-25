@@ -9,12 +9,7 @@
 	--placeholder: #c4c4c4;
 	--font-sans: "Inter Variable", "Helvetica Neue", Helvetica, Arial, sans-serif;
 	--font-mono: "Geist Mono Variable", ui-monospace, monospace;
-	/* Space between items (gallery gaps etc.) */
 	--gutter: clamp(16px, 1.5vw, 24px);
-	/* Page side margins: grow with the screen, and content stops at --max-width */
-	--margin: clamp(20px, 7vw, 120px);
-	--max-width: 1280px;
-	--inset: max(var(--margin), calc((100% - var(--max-width)) / 2));
 }
 
 * {
