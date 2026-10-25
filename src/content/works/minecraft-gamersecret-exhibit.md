@@ -6,11 +6,13 @@ summary: A life-sized Minecraft diorama streaming set for Gamecode Media Malaysi
 role: Graphic Design, Product Design
 date: 14 Apr 2023
 doneUnder: Paper Carpenter
-cover: /media/works/minecraft-gamersecret-exhibit/cover.jpg
+cover: /media/works/minecraft set/6202018829844989601.jpg
 gallery:
-  - /media/works/6202018829844989627.jpg
-  - /media/works/6202018829844989596.jpg
-  - /media/works/6202018829844989600-1.jpg
+  - /media/works/minecraft set/6202018829844989607.jpg
+  - /media/works/minecraft set/6202018829844989606.jpg
+  - /media/works/minecraft set/6202018829844989602.jpg
+  - /media/works/minecraft set/6202018829844989603.jpg
+  - /media/works/minecraft set/6202018829844989604.jpg
 draft: false
 ---
 We've teamed up with Gamecode Media Malaysia to bring them a jaw-dropping, life-sized Minecraft diorama streaming set.
