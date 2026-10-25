@@ -32,6 +32,16 @@ and delete `draft: true` when it's ready.
 
 Every save is recorded on GitHub, so any mistake can be undone.
 
+### Templates
+Each project has a **Template** setting:
+- **Standard** (or empty): one photo grid, filled from **Gallery**.
+- **Tabs**: a row of tabs, one per piece, each with its own photos/videos and an
+  optional caption, filled from **Pieces**. Visitors can also link to a single
+  piece, e.g. `…/works/one-thing-a-day/#candies`. One Thing A Day uses this.
+
+To add a piece: open the project, scroll to **Pieces**, click **Add an entry**,
+give it a tab name, upload its photos, and save. Drag pieces to reorder tabs.
+
 ### Previewing a new project before it's public
 Tick **Draft** and save. The project won't be listed anywhere on the site, but
 its page is built so you can check it at

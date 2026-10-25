@@ -11,6 +11,13 @@ summary: One or two sentences about the print.
 role: 3D Modelling, 3D Printing
 date: "2026"
 gallery: [01.jpg, 02.jpg]
+# For a tabbed page (one tab per piece), add:
+# template: tabs
+# pieces:
+#   - title: "First piece"
+#     caption: "Optional sentence"
+#     media:
+#       - /media/works/<file name>/photo.jpg
 draft: true
 ---
 

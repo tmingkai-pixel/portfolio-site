@@ -25,6 +25,23 @@ const works = defineCollection({
 		gallery: z.array(z.string()).default([]),
 		/** Videos (from cover/gallery) with a soundtrack: they get a "Sound on" button */
 		sound: z.array(z.string()).default([]),
+		/**
+		 * Page layout: "standard" (cover + one gallery) or "tabs" (cover + a tab
+		 * per piece, each with its own photos/videos — e.g. One Thing A Day)
+		 */
+		template: z.enum(["standard", "tabs"]).default("standard"),
+		/** Pieces shown as tabs when template is "tabs" */
+		pieces: z
+			.array(
+				z.object({
+					title: z.string(),
+					caption: z.string().nullish(),
+					/** Same path format as cover */
+					media: z.array(z.string()).nullish().transform((v) => v ?? []),
+				}),
+			)
+			.nullish()
+			.transform((v) => v ?? []),
 		/** Drafts get a page (a private preview link) but aren't listed on the live site */
 		draft: z.boolean().default(false),
 	}),

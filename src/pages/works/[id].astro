@@ -22,6 +22,19 @@ const { Content } = await render(work);
 const { data } = work;
 const base = import.meta.env.BASE_URL;
 
+// "Tabs" template: one tab per piece. Each tab gets a URL-friendly id for #links.
+const slugify = (text: string) =>
+	text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "piece";
+const usedIds = new Set<string>();
+const pieces = data.template === "tabs"
+	? data.pieces.map((piece) => {
+			let id = slugify(piece.title);
+			for (let n = 2; usedIds.has(id); n++) id = `${slugify(piece.title)}-${n}`;
+			usedIds.add(id);
+			return { ...piece, id };
+		})
+	: [];
+
 const details = [
 	["Role", data.role],
 	["Date", data.date],
@@ -54,7 +67,33 @@ const details = [
 			<Media src={workMedia(work.id, data.cover)} alt={data.title} class="cover" sound={data.sound.includes(data.cover)} eager />
 		</div>
 
-		{data.gallery.length > 0 && (
+		{pieces.length > 0 ? (
+			<div class="pieces" data-pieces>
+				<div class="piece-tabs" role="tablist" aria-label={`${data.title} pieces`}>
+					<button type="button" role="tab" class="piece-tab mono" data-piece-tab="all" aria-selected="true">All</button>
+					{pieces.map((piece) => (
+						<button type="button" role="tab" class="piece-tab mono" data-piece-tab={piece.id} aria-selected="false" aria-controls={piece.id}>
+							{piece.title}
+						</button>
+					))}
+				</div>
+				{pieces.map((piece) => (
+					<section class="piece" id={piece.id} data-piece={piece.id} role="tabpanel" aria-label={piece.title}>
+						<header class="piece-header">
+							<h2 class="piece-title">{piece.title}</h2>
+							{piece.caption && <p class="piece-caption">{piece.caption}</p>}
+						</header>
+						{piece.media.length > 0 && (
+							<div class="gallery">
+								{piece.media.map((file, i) => (
+									<Media src={workMedia(work.id, file)} alt={`${piece.title}, image ${i + 1}`} class="shot" sound={data.sound.includes(file)} />
+								))}
+							</div>
+						)}
+					</section>
+				))}
+			</div>
+		) : data.gallery.length > 0 && (
 			<div class="gallery">
 				{data.gallery.map((file, i) => (
 					<Media src={workMedia(work.id, file)} alt={`${data.title}, image ${i + 1}`} class="shot" sound={data.sound.includes(file)} />
@@ -146,6 +185,71 @@ const details = [
 	.gallery :global(img.shot) {
 		aspect-ratio: auto;
 	}
+	/* ---------- "Tabs" template: a navy strip of tabs, styled like the site nav ---------- */
+	.pieces {
+		margin-top: 0.94vw;
+	}
+	.piece-tabs {
+		display: flex;
+		gap: 0.2vw;
+		overflow-x: auto;
+		scrollbar-width: none;
+		background: var(--navy);
+		padding: 0.94vw 1.56vw 0;
+		margin: 0 -0.94vw;
+	}
+	.piece-tabs::-webkit-scrollbar {
+		display: none;
+	}
+	.piece-tab {
+		flex: 0 0 auto;
+		min-width: 7vw;
+		height: 1.87vw;
+		padding: 0 1.4vw;
+		border: 0;
+		border-radius: 1.56vw 1.56vw 0 0;
+		background: var(--orange);
+		color: var(--navy);
+		font-size: 1.094vw;
+		font-weight: 600;
+		letter-spacing: 0.05em;
+		white-space: nowrap;
+		cursor: pointer;
+		transition: background-color 0.15s ease;
+	}
+	.piece-tab:hover {
+		background: #f0901f;
+	}
+	.piece-tab[aria-selected="true"] {
+		background: var(--bg);
+	}
+	.piece {
+		padding-top: 2.5vw;
+	}
+	.piece[hidden] {
+		display: none;
+	}
+	.piece-header {
+		padding: 0 2.19vw 1.25vw;
+	}
+	.piece-title {
+		margin: 0;
+		color: var(--orange);
+		font-size: 3vw;
+		font-weight: 400;
+		letter-spacing: -0.02em;
+		line-height: 1;
+	}
+	.piece-caption {
+		margin: 0.6vw 0 0;
+		max-width: 43.75vw;
+		font-size: 1.47vw;
+		line-height: 1.4;
+	}
+	.piece .gallery {
+		margin-top: 0;
+	}
+
 	.pager {
 		display: flex;
 		justify-content: space-between;
@@ -207,6 +311,32 @@ const details = [
 			gap: 12px;
 			margin-top: 40px;
 		}
+		.piece-tabs {
+			gap: 3px;
+			padding: 12px 19px 0;
+			margin: 0 -19px;
+		}
+		.piece-tab {
+			min-width: 0;
+			height: 32px;
+			padding: 0 14px;
+			border-radius: 14px 14px 0 0;
+			font-size: 12px;
+		}
+		.piece {
+			padding-top: 28px;
+		}
+		.piece-header {
+			padding: 0 0 14px;
+		}
+		.piece-title {
+			font-size: 24px;
+		}
+		.piece-caption {
+			max-width: none;
+			margin-top: 6px;
+			font-size: 15px;
+		}
 		.pager {
 			flex-direction: column;
 			gap: 12px;
@@ -216,3 +346,37 @@ const details = [
 		}
 	}
 </style>
+
+<script>
+	// "Tabs" template: show one piece at a time, or all of them
+	for (const root of document.querySelectorAll<HTMLElement>("[data-pieces]")) {
+		const tabs = [...root.querySelectorAll<HTMLButtonElement>("[data-piece-tab]")];
+		const panels = [...root.querySelectorAll<HTMLElement>("[data-piece]")];
+
+		const select = (id: string, updateUrl: boolean) => {
+			for (const tab of tabs) tab.setAttribute("aria-selected", String(tab.dataset.pieceTab === id));
+			for (const panel of panels) panel.hidden = id !== "all" && panel.dataset.piece !== id;
+			// Pause videos in hidden pieces
+			for (const video of root.querySelectorAll<HTMLVideoElement>(".piece[hidden] video")) video.pause();
+			if (updateUrl) history.replaceState(null, "", id === "all" ? location.pathname + location.search : `#${id}`);
+		};
+
+		for (const tab of tabs) {
+			tab.addEventListener("click", () => {
+				select(tab.dataset.pieceTab!, true);
+				tab.scrollIntoView({ block: "nearest", inline: "nearest" });
+			});
+		}
+
+		// Open a piece straight from a link like /works/one-thing-a-day/#candies
+		const openFromHash = () => {
+			const id = decodeURIComponent(location.hash.slice(1));
+			if (id && panels.some((p) => p.dataset.piece === id)) {
+				select(id, false);
+				root.scrollIntoView();
+			}
+		};
+		openFromHash();
+		addEventListener("hashchange", openFromHash);
+	}
+</script>
