@@ -24,7 +24,7 @@ pieces:
   - title: 003_Music Player
     media:
       - /media/works/one-thing-a-day/itsneveranhour.mp4
-  - title: Kettle
+  - title: 004-Painted Kettle
     media:
       - /media/works/one-thing-a-day/kettle.mp4
   - title: Braun Coffee Maker
