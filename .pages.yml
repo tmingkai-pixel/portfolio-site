@@ -1,6 +1,12 @@
 # Pages CMS settings: https://pagescms.org/docs/configuration/
 # Lets people edit the site at https://app.pagescms.org without touching code.
 
+# Merge mode: saving only updates the fields shown in the editor and keeps
+# everything else in the file, so an out-of-date editor can't wipe settings.
+settings:
+  content:
+    merge: true
+
 media:
   input: public/media
   output: /media
