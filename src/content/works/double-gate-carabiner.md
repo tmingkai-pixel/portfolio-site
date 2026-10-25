@@ -1,6 +1,6 @@
 ---
 title: Double Gate Carabiner
-order: 7
+order: 9
 category: 3D Printing
 summary: A figure-eight carabiner with a gate on each loop.
 role: 3D Modelling, 3D Printing, Rendering

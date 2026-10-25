@@ -1,15 +1,19 @@
 @import "@fontsource-variable/inter/opsz.css";
 @import "@fontsource-variable/geist-mono";
 
+/*
+ * Colours, fonts and sizes are measured from the original Wix site.
+ * Above 750px wide, sizes are in vw (percent of window width) like Wix,
+ * so every screen size shows the same layout, just scaled.
+ */
 :root {
 	--bg: #d9d9d9;
 	--orange: #e17b0a;
 	--navy: #1c3184;
-	--tab-active: #dedede;
+	--label: #8e8eaa;
 	--placeholder: #c4c4c4;
 	--font-sans: "Inter Variable", "Helvetica Neue", Helvetica, Arial, sans-serif;
 	--font-mono: "Geist Mono Variable", ui-monospace, monospace;
-	--gutter: clamp(16px, 1.5vw, 24px);
 }
 
 * {
@@ -41,40 +45,44 @@ a {
 	color: inherit;
 }
 
-/* Big orange display type: the core of the look */
+/* Big orange display type. Inter 700 with slightly tighter spacing matches
+   the look of Wix's Neue Haas Grotesk Display Medium. */
 .display {
 	font-family: var(--font-sans);
-	font-weight: 600;
+	font-weight: 700;
 	color: var(--orange);
-	letter-spacing: -0.055em;
-	line-height: 0.88;
+	letter-spacing: -0.06em;
+	line-height: 0.75;
 	margin: 0;
 }
 
-/* Small uppercase monospace labels */
+/* Uppercase monospace text */
 .mono {
 	font-family: var(--font-mono);
 	text-transform: uppercase;
-	letter-spacing: 0.02em;
+	letter-spacing: -0.05em;
 }
 
+/* Small grey section labels ("Education", "Role", …) */
 .label {
 	font-family: var(--font-mono);
 	text-transform: uppercase;
-	font-size: 0.75rem;
-	color: #7a7a7a;
-	margin: 0 0 0.75rem;
-	font-weight: 500;
+	color: var(--label);
+	font-weight: 600;
+	letter-spacing: -0.05em;
+	line-height: 1;
+	margin: 0;
 }
 
 .pill {
-	display: block;
-	text-align: center;
-	border: 1.5px solid var(--orange);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid var(--orange);
 	border-radius: 999px;
 	color: var(--orange);
 	text-decoration: none;
-	padding: 0.35rem 1rem;
+	letter-spacing: -0.05em;
 	transition: background-color 0.15s ease, color 0.15s ease;
 }
 

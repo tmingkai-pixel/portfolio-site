@@ -1,6 +1,6 @@
 ---
 title: Minecraft GAMERSECRET Exhibit
-order: 3
+order: 5
 category: Commercial Work
 summary: A life-sized Minecraft diorama streaming set for Gamecode Media Malaysia.
 role: Graphic Design, Product Design

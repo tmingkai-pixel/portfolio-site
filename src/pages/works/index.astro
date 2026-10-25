@@ -39,78 +39,157 @@ const filters = ["All", ...categories];
 </Layout>
 
 <style>
+	/* Measured from the Wix Works page (desktop values in vw) */
 	.works {
-		padding: 1.25rem var(--gutter) 0;
+		padding: 1.6vw 0 1.3vw;
 	}
+	/* Category filter: not on the Wix site, kept small so the list looks the same */
 	.filters {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.4rem;
-		margin-bottom: 1.75rem;
+		gap: 0.5vw;
+		padding: 0 1.56vw;
+		margin-bottom: 1.9vw;
 	}
 	.filter {
-		font-size: 0.7rem;
-		font-weight: 700;
+		font-size: 0.9vw;
+		font-weight: 600;
 		color: var(--orange);
 		background: transparent;
-		border: 1.5px solid var(--orange);
+		border: 1px solid var(--orange);
 		border-radius: 999px;
-		padding: 0.3rem 0.85rem;
+		padding: 0.35vw 0.9vw;
 		cursor: pointer;
 	}
 	.filter[aria-pressed="true"] {
 		background: var(--orange);
-		color: var(--navy);
+		color: var(--bg);
 	}
 	.list {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 	}
-	.list li + li {
-		margin-top: 0.6rem;
+	.list li {
+		position: relative;
 	}
 	.list a {
-		display: grid;
-		grid-template-columns: 2.4rem 1fr auto;
-		align-items: start;
-		gap: 0.5rem;
+		display: block;
+		position: relative;
+		padding: 1.56vw 0 3.12vw;
 		text-decoration: none;
 	}
 	.num {
+		position: absolute;
+		left: 1.56vw;
+		top: 0;
 		color: var(--orange);
-		font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+		font-size: 2.34vw;
 		font-weight: 600;
-		padding-top: 0.25em;
+		letter-spacing: 0;
+		line-height: 1;
 	}
 	.title {
-		font-size: clamp(2rem, 6.4vw, 4.2rem);
-		line-height: 0.92;
+		display: block;
+		margin-left: 6.88vw;
+		width: 70.63vw;
+		font-size: 6vw; /* Wix 6.25vw in Neue Haas; Inter is ~4% wider */
+		font-weight: 800;
+		letter-spacing: -0.01em;
 		transition: color 0.15s ease;
 	}
 	.list a:hover .title {
 		color: var(--navy);
 	}
 	.draft {
-		font-size: 0.75rem;
+		font-size: 1vw;
 		letter-spacing: 0;
 		vertical-align: middle;
 		color: var(--navy);
 		border: 1px dashed var(--navy);
 		border-radius: 999px;
-		padding: 0.1rem 0.5rem;
+		padding: 0.15vw 0.6vw;
 	}
+	/* Thumbnails scattered down the right side, in the same pattern as Wix */
 	.list a :global(.thumb) {
-		width: clamp(60px, 12vw, 130px);
-		height: clamp(45px, 9vw, 95px);
+		position: absolute;
+		top: 0;
+		right: var(--right, 5.93vw);
+		width: var(--w, 3.44vw);
+		height: auto;
 		min-height: 0;
+	}
+	.list a :global(img.thumb) {
+		aspect-ratio: auto;
+	}
+	.list a :global(.placeholder.thumb) {
+		aspect-ratio: 4 / 3;
 	}
 	.list a :global(.placeholder.thumb span) {
 		display: none;
 	}
+	.list li:nth-child(6n + 1) { --w: 3.44vw; --right: 5.93vw; }
+	.list li:nth-child(6n + 2) { --w: 3.44vw; --right: 8.93vw; }
+	.list li:nth-child(6n + 3) { --w: 4.3vw; --right: 1.56vw; }
+	.list li:nth-child(6n + 4) { --w: 10.32vw; --right: 2.96vw; }
+	.list li:nth-child(6n + 5) { --w: 9.37vw; --right: 1.6vw; }
+	.list li:nth-child(6n) { --w: 10.32vw; --right: 7.91vw; }
 	.empty {
 		color: var(--orange);
-		font-size: 1.25rem;
+		font-size: 2.34vw;
+		padding: 0 1.56vw;
+	}
+
+	/* ---------- Phones: image on top, title below, number on the right ---------- */
+	@media (max-width: 749px) {
+		.works {
+			padding: 24px 23px 40px;
+		}
+		.filters {
+			gap: 6px;
+			padding: 0;
+			margin-bottom: 28px;
+		}
+		.filter {
+			font-size: 11px;
+			padding: 4px 10px;
+		}
+		.list li + li {
+			margin-top: 77px;
+		}
+		.list a {
+			display: grid;
+			grid-template-columns: 1fr auto;
+			column-gap: 12px;
+			padding: 0;
+		}
+		.list a :global(.thumb) {
+			position: static;
+			grid-column: 1 / -1;
+			grid-row: 1;
+			width: 100%;
+		}
+		.num {
+			position: static;
+			grid-column: 2;
+			grid-row: 2;
+			font-size: 5.64vw;
+			margin-top: 19px;
+		}
+		.title {
+			grid-column: 1;
+			grid-row: 2;
+			width: auto;
+			margin: 19px 0 0;
+			font-size: 8.72vw;
+		}
+		.draft {
+			font-size: 10px;
+		}
+		.empty {
+			font-size: 18px;
+			padding: 0;
+		}
 	}
 </style>
 

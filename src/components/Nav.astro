@@ -10,8 +10,11 @@ const isCurrent = (href: string) =>
 	href === base ? path === base : path.startsWith(href);
 ---
 
-<nav aria-label="Main">
-	<ul>
+<nav aria-label="Main" data-nav>
+	<button type="button" class="menu-button" aria-expanded="false" aria-controls="nav-links" aria-label="Menu" data-menu-button>
+		<span></span><span></span>
+	</button>
+	<ul id="nav-links">
 		{links.map((link) => (
 			<li>
 				<a
@@ -27,35 +30,105 @@ const isCurrent = (href: string) =>
 </nav>
 
 <style>
+	/* Sizes measured from the Wix site; desktop sizes scale with page width */
 	nav {
+		position: relative;
 		background: var(--navy);
-		padding: 10px var(--gutter) 0;
+		height: 2.81vw;
+		display: flex;
+		justify-content: flex-end;
+		align-items: flex-end;
+		padding-right: 1.56vw;
 	}
 	ul {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 		display: flex;
-		justify-content: flex-end;
-		gap: 2px;
 	}
 	a {
-		display: block;
-		min-width: 78px;
-		text-align: center;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 9.9vw;
+		height: 1.87vw;
 		background: var(--orange);
 		color: var(--navy);
-		font-size: 0.7rem;
-		font-weight: 700;
+		font-size: 1.094vw;
+		font-weight: 600;
+		letter-spacing: 0.05em;
 		text-decoration: none;
-		padding: 0.3rem 1rem 0.2rem;
-		border-radius: 12px 12px 0 0;
+		border-radius: 1.56vw 1.56vw 0 0;
 		transition: background-color 0.15s ease;
+	}
+	li:first-child a {
+		width: 9.19vw;
 	}
 	a:hover {
 		background: #f0901f;
 	}
 	a[aria-current="page"] {
-		background: var(--tab-active);
+		background: var(--bg);
+	}
+	.menu-button {
+		display: none;
+	}
+
+	/* Phones: a menu button opens the links, like the Wix mobile site */
+	@media (max-width: 749px) {
+		nav {
+			height: 36px;
+			align-items: center;
+			padding-right: 20px;
+		}
+		.menu-button {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			gap: 6px;
+			width: 30px;
+			height: 30px;
+			padding: 0 4px;
+			background: transparent;
+			border: 1.5px solid var(--orange);
+			cursor: pointer;
+		}
+		.menu-button span {
+			display: block;
+			height: 1.5px;
+			background: var(--orange);
+		}
+		ul {
+			display: none;
+			position: absolute;
+			top: 100%;
+			right: 0;
+			left: 0;
+			z-index: 10;
+			flex-direction: column;
+			gap: 8px;
+			background: var(--navy);
+			padding: 0 20px 16px;
+		}
+		nav.open ul {
+			display: flex;
+		}
+		a,
+		li:first-child a {
+			width: 100%;
+			height: 40px;
+			font-size: 14px;
+			border-radius: 20px;
+		}
 	}
 </style>
+
+<script>
+	for (const nav of document.querySelectorAll<HTMLElement>("[data-nav]")) {
+		const button = nav.querySelector<HTMLButtonElement>("[data-menu-button]")!;
+		button.addEventListener("click", () => {
+			const open = nav.classList.toggle("open");
+			button.setAttribute("aria-expanded", String(open));
+		});
+	}
+</script>

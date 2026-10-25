@@ -17,6 +17,8 @@ const works = defineCollection({
 		role: z.string(),
 		date: z.string(),
 		doneUnder: z.string().optional(),
+		/** Shown as "Project type" instead of the category, e.g. "Internal Company Project" */
+		projectType: z.string().optional(),
 		/** "/media/..." path (or a bare file name in public/media/works/<file name>/) */
 		cover: z.string().default("cover.jpg"),
 		/** Same path format as cover, shown in a grid */

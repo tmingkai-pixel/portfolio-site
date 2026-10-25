@@ -1,6 +1,6 @@
 ---
 title: Lip Balm Holder
-order: 10
+order: 12
 category: 3D Printing
 summary: A family of lip balm holders in different shapes and colours.
 role: 3D Modelling, 3D Printing, Rendering

@@ -58,6 +58,10 @@ content:
         type: string
         required: true
         description: Written as you want it shown, e.g. "2026" or "6 October 2023".
+      - name: projectType
+        label: Project type (optional)
+        type: string
+        description: Shown on the project page instead of the category, e.g. "Internal Company Project". Leave blank to use the category.
       - name: doneUnder
         label: Done under
         type: string

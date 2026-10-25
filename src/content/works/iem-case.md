@@ -1,6 +1,6 @@
 ---
 title: IEM Case
-order: 8
+order: 10
 category: 3D Printing
 summary: A compact two-part case for in-ear monitors.
 role: 3D Modelling, 3D Printing, Rendering

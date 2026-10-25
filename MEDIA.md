@@ -7,6 +7,9 @@ the site shows a grey box labelled with the path it's waiting for.
 - `public/media/home/hero-1.mp4`, `hero-2.mp4` — the two showreel clips
   (to add or remove clips, edit `heroSlides` in `src/pages/index.astro`)
 
+## About page
+- `public/media/about/portrait.jpg` — your photo on the navy card (portrait shape, about 9:10)
+
 ## Works (one folder per project, named after its file in src/content/works/)
 - `public/media/works/<project>/cover.jpg` — thumbnail and main image
 - any other photos/videos in the same folder, listed in the project's `gallery:` line

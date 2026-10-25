@@ -1,6 +1,6 @@
 ---
 title: Joy-Con Adaptor
-order: 9
+order: 11
 category: 3D Printing
 summary: A grip that joins two Nintendo Switch Joy-Cons into one controller.
 role: 3D Modelling, 3D Printing, Rendering
