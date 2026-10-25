@@ -14,6 +14,13 @@ sound:
 draft: false
 template: tabs
 pieces:
+  - title: 001-Yoto Player
+    caption: 21 September 2026
+    media:
+      - /media/works/one-thing-a-day/21sep2026-yotoplayer.jpg
+  - title: 002-Scanner
+    media:
+      - /media/works/one-thing-a-day/animation.mp4
   - title: Braun Coffee Maker
     media:
       - /media/works/one-thing-a-day/perspective-hero-shot.jpg
@@ -41,10 +48,6 @@ pieces:
   - title: Front Door
     media:
       - /media/works/one-thing-a-day/front-door-animated.mp4
-  - title: Yoto Player
-    caption: 21 September 2026
-    media:
-      - /media/works/one-thing-a-day/21sep2026-yotoplayer.jpg
   - title: It's Never an Hour
     media:
       - /media/works/one-thing-a-day/itsneveranhour.mp4
@@ -54,9 +57,6 @@ pieces:
   - title: Measuring Tape
     media:
       - /media/works/one-thing-a-day/measuring-tape.mp4
-  - title: Animation 1
-    media:
-      - /media/works/one-thing-a-day/animation.mp4
   - title: Animation 2
     media:
       - /media/works/one-thing-a-day/animation-2.mp4
