@@ -14,59 +14,59 @@ sound:
 draft: false
 template: tabs
 pieces:
-  - title: "Coffee Maker"
+  - title: Braun Coffee Maker
     media:
       - /media/works/one-thing-a-day/perspective-hero-shot.jpg
-  - title: "Upset Frog"
+  - title: Upset Frog
     media:
       - /media/works/one-thing-a-day/upset-frog.jpg
-  - title: "Candies"
+  - title: Candies
     media:
       - /media/works/one-thing-a-day/candies.mp4
-  - title: "Gantz Room"
+  - title: Gantz Room
     media:
       - /media/works/one-thing-a-day/gantz-room.jpg
-  - title: "Kettle"
+  - title: Kettle
     media:
       - /media/works/one-thing-a-day/kettle.mp4
-  - title: "Bad Outpost"
+  - title: Bad Outpost
     media:
       - /media/works/one-thing-a-day/bad-outpost.jpg
-  - title: "Glue"
+  - title: Glue
     media:
       - /media/works/one-thing-a-day/glue.mp4
-  - title: "Screaming Behelit"
+  - title: Screaming Behelit
     media:
       - /media/works/one-thing-a-day/screaming-behalit-beserk.jpg
-  - title: "Front Door"
+  - title: Front Door
     media:
       - /media/works/one-thing-a-day/front-door-animated.mp4
-  - title: "Yoto Player"
-    caption: "21 September 2026"
+  - title: Yoto Player
+    caption: 21 September 2026
     media:
       - /media/works/one-thing-a-day/21sep2026-yotoplayer.jpg
-  - title: "It's Never an Hour"
+  - title: It's Never an Hour
     media:
       - /media/works/one-thing-a-day/itsneveranhour.mp4
-  - title: "Tiny Jeep"
+  - title: Tiny Jeep
     media:
       - /media/works/one-thing-a-day/tinyjeep2.mp4
-  - title: "Measuring Tape"
+  - title: Measuring Tape
     media:
       - /media/works/one-thing-a-day/measuring-tape.mp4
-  - title: "Animation 1"
+  - title: Animation 1
     media:
       - /media/works/one-thing-a-day/animation.mp4
-  - title: "Animation 2"
+  - title: Animation 2
     media:
       - /media/works/one-thing-a-day/animation-2.mp4
-  - title: "Animation 3"
+  - title: Animation 3
     media:
       - /media/works/one-thing-a-day/animation-3.mp4
-  - title: "Sound Design 1"
+  - title: Sound Design 1
     media:
       - /media/works/one-thing-a-day/audio.mp4
-  - title: "Sound Design 2"
+  - title: Sound Design 2
     media:
       - /media/works/one-thing-a-day/audio-2.mp4
 ---
