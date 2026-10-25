@@ -14,6 +14,9 @@ sound:
 draft: false
 template: tabs
 pieces:
+  - title: Sound Design 2
+    media:
+      - /media/works/one-thing-a-day/audio-2.mp4
   - title: 001-Yoto Player
     caption: 21 September 2026
     media:
@@ -21,9 +24,18 @@ pieces:
   - title: 002-Scanner
     media:
       - /media/works/one-thing-a-day/animation.mp4
+  - title: It's Never an Hour
+    media:
+      - /media/works/one-thing-a-day/itsneveranhour.mp4
+  - title: Kettle
+    media:
+      - /media/works/one-thing-a-day/kettle.mp4
   - title: Braun Coffee Maker
     media:
       - /media/works/one-thing-a-day/perspective-hero-shot.jpg
+  - title: Sound Design 1
+    media:
+      - /media/works/one-thing-a-day/audio.mp4
   - title: Upset Frog
     media:
       - /media/works/one-thing-a-day/upset-frog.jpg
@@ -33,9 +45,6 @@ pieces:
   - title: Gantz Room
     media:
       - /media/works/one-thing-a-day/gantz-room.jpg
-  - title: Kettle
-    media:
-      - /media/works/one-thing-a-day/kettle.mp4
   - title: Bad Outpost
     media:
       - /media/works/one-thing-a-day/bad-outpost.jpg
@@ -48,9 +57,6 @@ pieces:
   - title: Front Door
     media:
       - /media/works/one-thing-a-day/front-door-animated.mp4
-  - title: It's Never an Hour
-    media:
-      - /media/works/one-thing-a-day/itsneveranhour.mp4
   - title: Tiny Jeep
     media:
       - /media/works/one-thing-a-day/tinyjeep2.mp4
@@ -63,11 +69,6 @@ pieces:
   - title: Animation 3
     media:
       - /media/works/one-thing-a-day/animation-3.mp4
-  - title: Sound Design 1
-    media:
-      - /media/works/one-thing-a-day/audio.mp4
-  - title: Sound Design 2
-    media:
-      - /media/works/one-thing-a-day/audio-2.mp4
+  - title: "bedroom "
 ---
 A body of work I've been committed to over the span of almost 3 weeks. I aim to create something everyday - no matter what the subject is. I've explored Nomad Sculpt, Blender and also sound design.
