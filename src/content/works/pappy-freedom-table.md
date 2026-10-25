@@ -23,5 +23,3 @@ Say goodbye to the hassle of heavy, cumbersome picnic tables and hello to The Fr
 The Freedom Table is easy to pack up and take with you wherever you go. Plus, it's coated so you don't have to worry about spills.
 
 Comes laminated with a splash-proof surface.
-
-At Paper Carpenter, we believe in fostering creativity and sustainability in education. Recently, we organised an engaging workshop tailored for educators, aimed at assembling our innovative collapsible cardboard picnic tables. This event was a celebration of ingenuity, sustainability, and collaborative learning.
