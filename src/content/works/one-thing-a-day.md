@@ -115,5 +115,10 @@ pieces:
       bridge tower you encounter bandits at in Skyrim
     media:
       - /media/works/one-thing-a-day/bad-outpost.jpg
+sound:
+  - /media/works/one-thing-a-day/braun combiscope/combiscope.mp4
+  - /media/works/one-thing-a-day/front door/front-door.mp4
+  - /media/works/one-thing-a-day/gantz room/gantz-room.mp4
+  - /media/works/one-thing-a-day/music player/music-player.mp4
 ---
 A body of work I've been committed to over the span of almost 3 weeks. I aim to create something everyday - no matter what the subject is. I've explored Nomad Sculpt, Blender and also sound design.
