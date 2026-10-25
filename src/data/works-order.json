@@ -1,16 +1,12 @@
 {
   "works": [
     "src/content/works/one-thing-a-day.md",
+    "src/content/works/3d-printing.md",
     "src/content/works/pappy-freedom-table.md",
     "src/content/works/box-yeti-mascot.md",
     "src/content/works/singapore-gp-f1-2023.md",
     "src/content/works/minecraft-gamersecret-exhibit.md",
     "src/content/works/uniqlo-sustainability-pop-up.md",
-    "src/content/works/headphone-carabiner.md",
-    "src/content/works/strapmod.md",
-    "src/content/works/double-gate-carabiner.md",
-    "src/content/works/iem-case.md",
-    "src/content/works/joycon-adaptor.md",
-    "src/content/works/lip-balm-holder.md"
+    "src/content/works/leather-craft.md"
   ]
 }
