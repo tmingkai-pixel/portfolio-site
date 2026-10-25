@@ -184,7 +184,7 @@ const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
 		text-decoration: none;
 	}
 	.gallery-item :global(.gallery-media) {
-		height: 33.96vw;
+		height: 28.87vw; /* 15% smaller than Wix's 33.96vw */
 		width: auto;
 		min-height: 0;
 	}
@@ -192,7 +192,7 @@ const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
 		aspect-ratio: auto;
 	}
 	.gallery-item :global(.placeholder.gallery-media) {
-		width: 33.96vw;
+		width: 28.87vw;
 	}
 	.gallery-caption {
 		position: absolute;
@@ -213,7 +213,7 @@ const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
 	}
 	.gallery-arrow {
 		position: absolute;
-		top: calc(4.84vw + 33.96vw / 2 - 2.97vw);
+		top: calc(4.84vw + 28.87vw / 2 - 2.97vw);
 		width: 5.94vw;
 		height: 5.94vw;
 		border: 0;
@@ -286,6 +286,12 @@ const heroSlides = ["home/hero-1.mp4", "home/hero-2.mp4"];
 			gap: 40px;
 			overflow: visible;
 			padding: 0;
+		}
+		.gallery-track {
+			align-items: center;
+		}
+		.gallery-item {
+			width: 85%;
 		}
 		.gallery-item :global(.gallery-media),
 		.gallery-item :global(.placeholder.gallery-media) {
