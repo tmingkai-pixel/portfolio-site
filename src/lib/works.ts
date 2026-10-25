@@ -1,12 +1,18 @@
 import { getCollection } from "astro:content";
 
-/** All works in display order. Drafts are only included in dev. */
-export async function getWorks() {
-	const works = await getCollection(
-		"works",
-		({ data }) => import.meta.env.DEV || !data.draft,
-	);
+/** Every work, drafts included, in display order. Each one gets a page. */
+export async function getAllWorks() {
+	const works = await getCollection("works");
 	return works.sort((a, b) => a.data.order - b.data.order);
+}
+
+/**
+ * Works shown in lists (Works page, home gallery, next/previous links).
+ * Drafts are hidden on the live site but listed in dev so they're easy to find.
+ */
+export async function getWorks() {
+	const works = await getAllWorks();
+	return works.filter(({ data }) => import.meta.env.DEV || !data.draft);
 }
 
 /**

@@ -2,14 +2,19 @@
 import { render } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import Media from "../../components/Media.astro";
-import { getWorks, workMedia } from "../../lib/works";
+import { getAllWorks, getWorks, workMedia } from "../../lib/works";
 
+// Drafts get a page too (a private preview link), but only listed works
+// appear in the previous/next links.
 export async function getStaticPaths() {
-	const works = await getWorks();
-	return works.map((work, i) => ({
-		params: { id: work.id },
-		props: { work, prev: works[i - 1], next: works[i + 1] },
-	}));
+	const [all, listed] = await Promise.all([getAllWorks(), getWorks()]);
+	return all.map((work) => {
+		const i = listed.findIndex((w) => w.id === work.id);
+		return {
+			params: { id: work.id },
+			props: { work, prev: i > 0 ? listed[i - 1] : undefined, next: i >= 0 ? listed[i + 1] : undefined },
+		};
+	});
 }
 
 const { work, prev, next } = Astro.props;
@@ -25,7 +30,12 @@ const details = [
 ].filter(([, value]) => value);
 ---
 
-<Layout title={data.title} description={data.summary}>
+<Layout title={data.title} description={data.summary} noindex={data.draft}>
+	{data.draft && (
+		<p class="draft-banner mono">
+			Draft preview: only people with this link can see it. Untick “Draft” to publish.
+		</p>
+	)}
 	<article>
 		<div class="intro">
 			<div class="text">
@@ -62,6 +72,15 @@ const details = [
 <style>
 	article {
 		padding: 0.6rem var(--gutter) 0;
+	}
+	.draft-banner {
+		margin: 0;
+		background: var(--navy);
+		color: #fff;
+		border-top: 2px dashed var(--orange);
+		font-size: 0.7rem;
+		font-weight: 600;
+		padding: 0.6rem var(--gutter);
 	}
 	.intro {
 		display: grid;

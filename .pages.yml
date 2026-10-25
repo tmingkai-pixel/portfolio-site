@@ -87,5 +87,9 @@ content:
           categories: [video]
           multiple: true
       - name: draft
-        label: Draft (hide from the live site)
+        label: Draft (preview before publishing)
         type: boolean
+        description: >-
+          While ticked, the project isn't listed on the site, but its page still exists so you can check it at
+          https://tmingkai-pixel.github.io/portfolio-site/works/<file name>/ (about a minute after saving).
+          Untick and save to publish.

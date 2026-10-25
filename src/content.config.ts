@@ -23,7 +23,7 @@ const works = defineCollection({
 		gallery: z.array(z.string()).default([]),
 		/** Videos (from cover/gallery) with a soundtrack: they get a "Sound on" button */
 		sound: z.array(z.string()).default([]),
-		/** Drafts show up in `npm run dev` but not on the live site */
+		/** Drafts get a page (a private preview link) but aren't listed on the live site */
 		draft: z.boolean().default(false),
 	}),
 });
