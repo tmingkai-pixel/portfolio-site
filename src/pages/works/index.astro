@@ -110,30 +110,20 @@ const filters = ["All", ...categories];
 		border-radius: 999px;
 		padding: 0.15vw 0.6vw;
 	}
-	/* Thumbnails scattered down the right side, in the same pattern as Wix */
+	/* Thumbnails: all the same size and shape, lined up on the right */
 	.list a :global(.thumb) {
 		position: absolute;
 		top: 0;
-		right: var(--right, 5.93vw);
-		width: var(--w, 3.44vw);
+		right: 1.56vw;
+		width: 10.32vw;
 		height: auto;
-		min-height: 0;
-	}
-	.list a :global(img.thumb) {
-		aspect-ratio: auto;
-	}
-	.list a :global(.placeholder.thumb) {
 		aspect-ratio: 4 / 3;
+		min-height: 0;
+		object-fit: cover;
 	}
 	.list a :global(.placeholder.thumb span) {
 		display: none;
 	}
-	.list li:nth-child(6n + 1) { --w: 3.44vw; --right: 5.93vw; }
-	.list li:nth-child(6n + 2) { --w: 3.44vw; --right: 8.93vw; }
-	.list li:nth-child(6n + 3) { --w: 4.3vw; --right: 1.56vw; }
-	.list li:nth-child(6n + 4) { --w: 10.32vw; --right: 2.96vw; }
-	.list li:nth-child(6n + 5) { --w: 9.37vw; --right: 1.6vw; }
-	.list li:nth-child(6n) { --w: 10.32vw; --right: 7.91vw; }
 	.empty {
 		color: var(--orange);
 		font-size: 2.34vw;
@@ -168,6 +158,10 @@ const filters = ["All", ...categories];
 			grid-column: 1 / -1;
 			grid-row: 1;
 			width: 100%;
+		}
+		.list a :global(img.thumb),
+		.list a :global(video.thumb) {
+			aspect-ratio: auto;
 		}
 		.num {
 			position: static;
