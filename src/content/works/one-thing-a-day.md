@@ -65,7 +65,7 @@ pieces:
     caption: I was watching Modern Family while I was putting this together so it
       might be a little inspired by the Dunphy's house.
     media:
-      - /media/works/one-thing-a-day/front door/front-door.mp4
+      - /media/works/one-thing-a-day/front door/front-door-square.mp4
       - /media/works/one-thing-a-day/front door/front-door-1.jpg
       - /media/works/one-thing-a-day/front door/front-door-2.jpg
   - title: 009-Living Room Isometric
@@ -105,17 +105,18 @@ pieces:
     caption: A can of old Dunlop contact adhesive I had. I took the opportunity to
       experiment with a low poly high viscosity fluid.
     media:
-      - /media/works/one-thing-a-day/glue/glue.mp4
+      - /media/works/one-thing-a-day/glue/glue-square.mp4
       - /media/works/one-thing-a-day/glue/glue.jpg
+      - /media/works/one-thing-a-day/glue/glue-2.jpg
   - title: 015-Measuring Tape
     caption: My personal Stanley measuring tape.
     media:
-      - /media/works/one-thing-a-day/measuring tape/measuring-tape.mp4
+      - /media/works/one-thing-a-day/measuring tape/measuring-tape-square.mp4
   - title: 016-Tiny Jeep
     caption: Saw something that reminded me of "Micro Machines", this racing video
       game I used to play with my brother.
     media:
-      - /media/works/one-thing-a-day/micro machine/micro-machines.mp4
+      - /media/works/one-thing-a-day/micro machine/micro-machines-square.mp4
   - title: 017-Bad Outpost
     caption: Trying my hand at designing scapes, this one is reminiscent of that
       first bridge tower you encounter bandits at in Skyrim.
