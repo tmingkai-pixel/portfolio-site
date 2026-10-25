@@ -1,0 +1,91 @@
+# Pages CMS settings: https://pagescms.org/docs/configuration/
+# Lets people edit the site at https://app.pagescms.org without touching code.
+
+media:
+  input: public/media
+  output: /media
+  rename: safe
+
+content:
+  - name: works
+    label: Works
+    type: collection
+    path: src/content/works
+    format: yaml-frontmatter
+    exclude: [_template.md]
+    filename:
+      template: "{title}.md"
+      field: false
+    view:
+      fields: [title, category, order]
+      primary: title
+      sort: [order, title]
+      default:
+        sort: order
+        order: asc
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: category
+        label: Category
+        type: select
+        required: true
+        options:
+          values: [Commercial Work, Personal Work, 3D Printing]
+      - name: order
+        label: Position in list
+        type: number
+        required: true
+        description: Lower numbers show first on the Works page.
+      - name: summary
+        label: Short summary
+        type: text
+        required: true
+        description: One or two sentences, used for link previews.
+      - name: body
+        label: Description
+        type: rich-text
+        description: The main text on the project page.
+      - name: role
+        label: Role
+        type: string
+        required: true
+        description: e.g. "3D Modelling, 3D Printing, Rendering"
+      - name: date
+        label: Date
+        type: string
+        required: true
+        description: Written as you want it shown, e.g. "2026" or "6 October 2023".
+      - name: doneUnder
+        label: Done under
+        type: string
+        description: Company or client, if any. Leave blank to hide.
+      - name: cover
+        label: Cover image or video
+        type: file
+        required: true
+        description: Thumbnail on the Works list and the main image on the project page.
+        options:
+          path: public/media/works
+          categories: [image, video]
+      - name: gallery
+        label: Gallery
+        type: file
+        description: Photos and videos shown in a grid. Please upload JPGs (not huge PNGs) so the site stays fast.
+        options:
+          path: public/media/works
+          categories: [image, video]
+          multiple: true
+      - name: sound
+        label: Videos with sound
+        type: file
+        description: Pick any videos above that have audio worth hearing; they get a "Sound on" button.
+        options:
+          path: public/media/works
+          categories: [video]
+          multiple: true
+      - name: draft
+        label: Draft (hide from the live site)
+        type: boolean

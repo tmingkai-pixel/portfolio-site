@@ -18,3 +18,13 @@ short, muted and under ~10 MB so pages load quickly.
 ## Adding a 3D printing project
 Copy `src/content/works/_template.md`, rename it without the underscore, fill it in,
 and delete `draft: true`. Drafts appear in `npm run dev` but not on the live site.
+
+## Editing without code (Pages CMS)
+1. Make a free GitHub account and accept the invite to this repo.
+2. Go to https://app.pagescms.org, sign in with GitHub, and open **portfolio-site**.
+3. Click **Works** to edit a project, or **Add an entry** for a new one.
+4. Use the Cover/Gallery buttons to upload photos. Upload into that project's
+   folder under `works/` (make a new folder for a new project).
+5. Click **Save**. The live site updates about a minute later.
+
+Every save is recorded on GitHub, so any mistake can be undone.

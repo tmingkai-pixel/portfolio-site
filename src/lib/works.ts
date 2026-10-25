@@ -9,5 +9,9 @@ export async function getWorks() {
 	return works.sort((a, b) => a.data.order - b.data.order);
 }
 
-/** Path inside public/media/ for a file belonging to a work */
-export const workMedia = (id: string, file: string) => `works/${id}/${file}`;
+/**
+ * Path inside public/media/ for a work's file. Accepts the full "/media/..."
+ * paths Pages CMS writes, or a bare file name in public/media/works/<id>/.
+ */
+export const workMedia = (id: string, file: string) =>
+	file.startsWith("/media/") ? file.slice("/media/".length) : `works/${id}/${file}`;

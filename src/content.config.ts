@@ -17,9 +17,9 @@ const works = defineCollection({
 		role: z.string(),
 		date: z.string(),
 		doneUnder: z.string().optional(),
-		/** File in public/media/works/<file name>/ (image or .mp4) */
+		/** "/media/..." path (or a bare file name in public/media/works/<file name>/) */
 		cover: z.string().default("cover.jpg"),
-		/** Files in public/media/works/<file name>/, shown in a grid */
+		/** Same path format as cover, shown in a grid */
 		gallery: z.array(z.string()).default([]),
 		/** Videos (from cover/gallery) with a soundtrack: they get a "Sound on" button */
 		sound: z.array(z.string()).default([]),
