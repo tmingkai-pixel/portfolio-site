@@ -13,7 +13,7 @@ pieces:
       - /media/works/3d printing/headphone carabiner/0001-0120.mp4
       - /media/works/3d printing/headphone carabiner/render-2.jpg
       - /media/works/3d printing/headphone carabiner/render-3.jpg
-  - title: Iem Case
+  - title: IEM Case
     media:
       - /media/works/3d printing/iem case/0001-0130.mp4
       - /media/works/3d printing/iem case/render-2.jpg
