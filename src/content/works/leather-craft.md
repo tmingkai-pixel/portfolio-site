@@ -2,8 +2,8 @@
 title: Leather Craft
 category: Personal Work
 summary: A sample of my leather crafting works over the years, creating pieces
-  for daily life
-role: Designer, crafter
+  for daily life.
+role: Designer, Crafter, Photographer
 date: Open
 cover: /media/works/leather craft/leather bag/img5973.jpg
 template: standard
@@ -21,3 +21,4 @@ gallery:
   - /media/works/leather craft/wallet 3/wallet-3a.jpeg
 draft: false
 ---
+A sample of my leather crafting works over the years, creating pieces for daily life.
