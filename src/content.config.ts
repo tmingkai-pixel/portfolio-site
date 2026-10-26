@@ -19,8 +19,42 @@ const works = defineCollection({
 		projectType: z.string().optional(),
 		/** "/media/..." path (or a bare file name in public/media/works/<file name>/) */
 		cover: z.string().default("cover.jpg"),
+		/** Describes the cover image for people using screen readers */
+		coverAlt: z.string().nullish(),
 		/** Same path format as cover, shown in a grid */
 		gallery: z.array(z.string()).default([]),
+		/**
+		 * Standard template, story layout: groups with a heading, an optional
+		 * one-line intro, and rows laid out as full / pair / trio. When present it
+		 * replaces `gallery` (which stays as the simple masonry fallback).
+		 */
+		story: z
+			.array(
+				z.object({
+					heading: z.string(),
+					intro: z.string().nullish(),
+					rows: z
+						.array(
+							z.object({
+								layout: z.enum(["full", "pair", "trio"]).default("pair"),
+								images: z
+									.array(
+										z.object({
+											src: z.string(),
+											alt: z.string().nullish(),
+											caption: z.string().nullish(),
+										}),
+									)
+									.nullish()
+									.transform((v) => (v ?? []).filter((img) => img.src)),
+							}),
+						)
+						.nullish()
+						.transform((v) => v ?? []),
+				}),
+			)
+			.nullish()
+			.transform((v) => v ?? []),
 		/** Videos (from cover/gallery) with a soundtrack: they get a "Sound on" button */
 		sound: z.array(z.string()).default([]),
 		/**

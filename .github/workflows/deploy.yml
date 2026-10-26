@@ -24,6 +24,12 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # Keep Astro's optimized images between deploys so builds stay fast
+      - uses: actions/cache@v4
+        with:
+          path: node_modules/.astro
+          key: astro-images-${{ hashFiles('public/media/**') }}
+          restore-keys: astro-images-
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

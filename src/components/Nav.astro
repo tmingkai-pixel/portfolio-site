@@ -79,18 +79,19 @@ const isCurrent = (href: string) =>
 	/* Phones: a menu button opens the links, like the Wix mobile site */
 	@media (max-width: 749px) {
 		nav {
-			height: 36px;
+			height: 52px;
 			align-items: center;
-			padding-right: 20px;
+			padding-right: 16px;
 		}
 		.menu-button {
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
 			gap: 6px;
-			width: 30px;
-			height: 30px;
-			padding: 0 4px;
+			/* 44 x 44px so it's easy to tap */
+			width: 44px;
+			height: 44px;
+			padding: 0 10px;
 			background: transparent;
 			border: 1.5px solid var(--orange);
 			cursor: pointer;

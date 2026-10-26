@@ -2,6 +2,8 @@
 import { render } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import Media from "../../components/Media.astro";
+import StoryGroup from "../../components/StoryGroup.astro";
+import ProjectPager from "../../components/ProjectPager.astro";
 import { getAllWorks, getWorks, workMedia } from "../../lib/works";
 
 // Drafts get a page too (a private preview link), but only listed works
@@ -12,12 +14,18 @@ export async function getStaticPaths() {
 		const i = listed.findIndex((w) => w.id === work.id);
 		return {
 			params: { id: work.id },
-			props: { work, prev: i > 0 ? listed[i - 1] : undefined, next: i >= 0 ? listed[i + 1] : undefined },
+			props: {
+				work,
+				prev: i > 0 ? listed[i - 1] : undefined,
+				next: i >= 0 ? listed[i + 1] : undefined,
+				position: i >= 0 ? i + 1 : undefined,
+				total: listed.length,
+			},
 		};
 	});
 }
 
-const { work, prev, next } = Astro.props;
+const { work, prev, next, position, total } = Astro.props;
 const { Content } = await render(work);
 const { data } = work;
 const base = import.meta.env.BASE_URL;
@@ -35,6 +43,68 @@ const pieces = data.template === "tabs"
 		})
 	: [];
 
+// Standard template: "story" groups when the project has them, otherwise the
+// photos from the plain Gallery (see below). The cover is shown at the top, so never repeat it below.
+const isCover = (file: string) => file === data.cover;
+const story: { heading: string; intro?: string | null; rows: any[] }[] = data.template === "tabs"
+	? []
+	: data.story
+			.map((group) => ({
+				...group,
+				rows: group.rows
+					.map((row) => ({ ...row, images: row.images.filter((img) => !isCover(img.src)) }))
+					.filter((row) => row.images.length > 0),
+			}))
+			.filter((group) => group.rows.length > 0);
+const gallery = data.gallery.filter((file) => !isCover(file));
+
+// Projects with only a plain Gallery use the same layout: one group with no heading.
+// Landscape photos get a full-width row; portraits pair up (so nothing is badly cropped).
+const imageMeta = import.meta.glob<{ default: ImageMetadata }>(
+	"/public/media/**/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}",
+	{ eager: true },
+);
+const isLandscape = (file: string) => {
+	const meta = imageMeta[`/public/media/${workMedia(work.id, file)}`]?.default;
+	return meta ? meta.width / meta.height > 1.1 : false;
+};
+if (data.template !== "tabs" && story.length === 0 && gallery.length > 0) {
+	type GalleryImage = { src: string; alt: string };
+	const rows: { layout: "full" | "pair"; images: GalleryImage[] }[] = [];
+	let pending: GalleryImage[] = [];
+	const flush = () => {
+		if (pending.length) rows.push({ layout: pending.length === 2 ? "pair" : "full", images: pending });
+		pending = [];
+	};
+	gallery.forEach((src, i) => {
+		const image = { src, alt: `${data.title}, photo ${i + 1} of ${gallery.length}` };
+		if (isLandscape(src)) {
+			flush();
+			rows.push({ layout: "full", images: [image] });
+		} else {
+			pending.push(image);
+			if (pending.length === 2) flush();
+		}
+	});
+	flush();
+	story.push({ heading: "", intro: null, rows });
+}
+const hasStory = story.length > 0;
+
+// Tabs template: each piece becomes a group on the image side. Media is square,
+// so frames are square; an odd item out (usually the video) leads full width.
+const pieceGroups = pieces.map((piece) => {
+	const media = piece.media.filter((file) => !isCover(file));
+	const images = media.map((src, i) => ({ src, alt: `${piece.title} (${i + 1} of ${media.length})` }));
+	const rows = images.length % 2 === 1
+		? [{ layout: "full" as const, images: images.slice(0, 1) }, { layout: "pair" as const, images: images.slice(1) }]
+		: [{ layout: "pair" as const, images }];
+	return { ...piece, rows: rows.filter((row) => row.images.length > 0) };
+});
+const isTabs = pieceGroups.length > 0;
+// Story and Tabs pages share the split layout (pinned text left, images right)
+const isSplit = hasStory || isTabs;
+
 const details = [
 	["Role", data.role],
 	["Date", data.date],
@@ -49,68 +119,161 @@ const details = [
 			Draft preview: only people with this link can see it. Untick “Draft” to publish.
 		</p>
 	)}
-	<article>
-		<div class="intro">
-			<div class="text">
-				<h1 class="display">{data.title}</h1>
-				<div class="body"><Content /></div>
-
-				<dl>
-					{details.map(([label, value]) => (
-						<div>
-							<dt class="label">{label}</dt>
-							<dd>{value}</dd>
-						</div>
-					))}
-				</dl>
-			</div>
-			<Media src={workMedia(work.id, data.cover)} alt={data.title} class="cover" sound={data.sound.includes(data.cover)} eager />
-		</div>
-
-		{pieces.length > 0 ? (
-			<div class="pieces" data-pieces>
-				<div class="piece-tabs" role="tablist" aria-label={`${data.title} pieces`}>
-					<button type="button" role="tab" class="piece-tab mono" data-piece-tab="all" aria-selected="true">All</button>
-					{pieces.map((piece) => (
-						<button type="button" role="tab" class="piece-tab mono" data-piece-tab={piece.id} aria-selected="false" aria-controls={piece.id}>
-							{piece.title}
-						</button>
-					))}
-				</div>
-				<div class="piece-panels">
-				{pieces.map((piece) => (
-					<section class="piece" id={piece.id} data-piece={piece.id} role="tabpanel" aria-label={piece.title}>
-						<header class="piece-header">
-							<h2 class="piece-title">{piece.title}</h2>
-							{piece.caption && <p class="piece-caption">{piece.caption}</p>}
-						</header>
-						{piece.media.length > 0 && (
-							<div class="gallery">
-								{piece.media.map((file, i) => (
-									<Media src={workMedia(work.id, file)} alt={`${piece.title}, image ${i + 1}`} class="shot" sound={data.sound.includes(file)} />
+	<article data-lightbox>
+		{isSplit ? (
+			/* Split layout: text pinned on the left, every image in two columns on the right */
+			<div class="split">
+				<aside class="split-text">
+					<h1 class="display">{data.title}</h1>
+					<section class="info-box">
+						<h2 class="label">In short</h2>
+						<p class="pitch">{data.summary}</p>
+					</section>
+					<dl class:list={["details", "info-box", "info-grid", details.length % 2 === 1 && "info-grid--odd"]}>
+						{details.map(([label, value]) => (
+							<div>
+								<dt class="label">{label}</dt>
+								<dd>{value}</dd>
+							</div>
+						))}
+					</dl>
+					{hasStory && (
+						<section class="info-box info-box--about">
+							<h2 class="label">About the project</h2>
+							<div class="body body--aside"><Content /></div>
+						</section>
+					)}
+					{isTabs && (
+						<section class="info-box info-box--pieces">
+							<h2 class="label">Pieces <span class="pieces-count">{pieceGroups.length}</span></h2>
+							<div class="pieces-grid" role="tablist" aria-label={`${data.title} pieces`}>
+								{pieceGroups.map((piece, i) => (
+									<button type="button" role="tab" class="piece-tab" data-piece-tab={piece.id} aria-controls={piece.id} aria-selected={i === 0 ? "true" : "false"}>
+										{piece.title}
+									</button>
+								))}
+								<button type="button" role="tab" class="piece-tab piece-tab--all" data-piece-tab="all" aria-selected="false">All</button>
+							</div>
+						</section>
+					)}
+					<ProjectPager prev={prev} next={next} position={position} total={total} compact />
+				</aside>
+				<div class="split-media">
+					{/* Tabs pages go straight into the description and pieces, no cover image */}
+					{!isTabs && (
+						<Media
+							src={workMedia(work.id, data.cover)}
+							alt={data.coverAlt || data.title}
+							class="cover"
+							sound={data.sound.includes(data.cover)}
+							sizes="(max-width: 749px) 100vw, 60vw"
+							lightbox
+							eager
+						/>
+					)}
+					{hasStory && (
+						<>
+							<StoryGroup workId={work.id} title={data.title} sound={data.sound} {...story[0]} />
+							{/* Phones only: on desktop the description sits in the pinned left column */}
+							<section class="info-box body--after">
+								<h2 class="label">About the project</h2>
+								<div class="body"><Content /></div>
+							</section>
+							{story.slice(1).map((group) => (
+								<StoryGroup workId={work.id} title={data.title} sound={data.sound} {...group} />
+							))}
+						</>
+					)}
+					{isTabs && (
+						<>
+							<div class="piece-panels" data-pieces>
+								{pieceGroups.map((piece, i) => (
+									<StoryGroup
+										workId={work.id}
+										title={data.title}
+										sound={data.sound}
+										heading={piece.title}
+										intro={piece.caption}
+										rows={piece.rows}
+										square
+										headerBelowFirst
+										id={piece.id}
+										data-piece={piece.id}
+										role="tabpanel"
+										aria-label={piece.title}
+										hidden={i !== 0}
+									/>
 								))}
 							</div>
-						)}
-					</section>
-				))}
+						</>
+					)}
 				</div>
 			</div>
-		) : data.gallery.length > 0 && (
-			<div class="gallery">
-				{data.gallery.map((file, i) => (
-					<Media src={workMedia(work.id, file)} alt={`${data.title}, image ${i + 1}`} class="shot" sound={data.sound.includes(file)} />
-				))}
+		) : (
+			<div class="intro">
+				<div class="text">
+					<h1 class="display">{data.title}</h1>
+					<div class="body"><Content /></div>
+					<dl class="details">
+						{details.map(([label, value]) => (
+							<div>
+								<dt class="label">{label}</dt>
+								<dd>{value}</dd>
+							</div>
+						))}
+					</dl>
+				</div>
+				<Media
+					src={workMedia(work.id, data.cover)}
+					alt={data.coverAlt || data.title}
+					class="cover"
+					sound={data.sound.includes(data.cover)}
+					sizes="(max-width: 749px) 100vw, 49vw"
+					eager
+				/>
 			</div>
 		)}
 
-		<nav class="pager mono" aria-label="More works">
-			{prev ? <a href={`${base}works/${prev.id}/`}>Previous: {prev.data.title}</a> : <span />}
-			{next && <a href={`${base}works/${next.id}/`}>Next: {next.data.title}</a>}
-		</nav>
+		{/* Story pages show the pager inside the pinned column on desktop; phones get it here */}
+		<div class:list={[isSplit && "pager-bottom--story"]}>
+			<ProjectPager prev={prev} next={next} position={position} total={total} />
+		</div>
 	</article>
 </Layout>
 
 <style>
+	/* Full-screen viewer (PhotoSwipe) caption, in the site's colours */
+	:global(.pswp__caption) {
+		position: absolute;
+		left: 50%;
+		bottom: 16px;
+		transform: translateX(-50%);
+		max-width: min(90vw, 760px);
+		padding: 8px 14px;
+		background: var(--navy);
+		color: #fff;
+		font-family: var(--font-sans);
+		font-size: 15px;
+		line-height: 1.4;
+		text-align: center;
+	}
+	:global(.pswp__caption:empty) {
+		display: none;
+	}
+	/* Close and arrow buttons: at least 44 x 44px and clearly visible */
+	:global(.pswp__button) {
+		min-width: 44px;
+		min-height: 44px;
+	}
+	:global(.pswp--idle .pswp__top-bar),
+	:global(.pswp--idle .pswp__button--arrow) {
+		opacity: 1 !important;
+	}
+	:global(.pswp__button:focus-visible) {
+		outline: 3px solid var(--orange);
+		outline-offset: -3px;
+	}
+
 	/* Measured from the Wix project pages (desktop values in vw) */
 	article {
 		padding: 0.98vw 0.94vw 3vw;
@@ -148,30 +311,216 @@ const details = [
 	.body :global(p:last-child) {
 		margin-bottom: 0;
 	}
-	dl {
-		margin: 3.12vw 0 0;
+	/* ---------- Story layout: text pinned on the left half, images on the right half ----------
+	   The left column always fits one screen: sizes use the smaller of vw/vh, and
+	   --fit (set by the script below) shrinks everything a little more if needed. */
+	.split {
+		position: relative;
+		display: grid;
+		/* minmax(0, …) so wide content (like the swipeable pieces row) can't stretch a column */
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		align-items: start;
+		margin: 0 -0.94vw;
 	}
-	dl div {
-		border-top: 1px solid var(--orange);
-		min-height: 5.77vw;
-		padding-top: 1.01vw;
+	/* Dot grid behind the image half */
+	.split::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		width: 50%;
+		/* Dots use the text colour itself, kept light by making them small */
+		color: var(--navy);
+		background-image: radial-gradient(circle, currentColor 0.05vw, transparent 0.065vw);
+		background-size: 1.11vw 1.11vw;
+		background-position: center top;
+		/* Fade the dots in from the middle of the page to where the images start */
+		-webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--dots-fade, 5.35vw));
+		mask-image: linear-gradient(to right, transparent 0, #000 var(--dots-fade, 5.35vw));
+		pointer-events: none;
 	}
-	dt {
-		font-size: 1.17vw;
-		line-height: 1.4;
+	.split-media {
+		position: relative;
+		z-index: 1;
+	}
+	.split-text {
+		z-index: 1;
+	}
+	.split-text {
+		--fit: 1;
+		position: sticky;
+		top: 0.98vw;
+		height: calc(100vh - 2.81vw - 0.98vw);
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+		padding: calc(2.4vh * var(--fit)) 3vw calc(2vh * var(--fit)) 3.13vw;
+	}
+	.split-text h1 {
+		font-size: calc(min(4.2vw, 7.4vh) * var(--fit));
+	}
+	.pitch {
+		margin: calc(1.6vh * var(--fit)) 0 0;
+		font-size: calc(min(1.2vw, 2.05vh) * var(--fit));
+		line-height: 1.35;
+	}
+	/* Details as a compact 2 x 2 grid */
+	/* Text boxes in the pinned column: same dashed style as the previous/next box */
+	.info-box {
+		color: var(--navy);
+		border: 2px dashed currentColor;
+		border-radius: 3px;
+		padding: calc(1.25vh * var(--fit)) calc(1.15vw * var(--fit));
+		margin: calc(1.5vh * var(--fit)) 0 0;
+	}
+	.info-box .label {
+		display: block;
+		margin: 0 0 calc(0.6vh * var(--fit));
+		font-size: calc(min(0.7vw, 1.2vh) * var(--fit));
+		letter-spacing: 0.04em;
+	}
+	.split-text .info-box .pitch,
+	.split-text .info-box .body {
+		margin-top: 0;
+	}
+	/* Details: one box split into a 2 x 2 grid by dashed lines */
+	.split-text .info-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		column-gap: 0;
+		padding: 0;
+		overflow: hidden;
+	}
+	.split-text .info-grid div {
+		min-height: 0;
+		/* Each cell draws its top and left divider; the box clips the outer ones */
+		margin: -2px 0 0 -2px;
+		border-top: 2px dashed currentColor;
+		border-left: 2px dashed currentColor;
+		padding: calc(1.1vh * var(--fit)) calc(1.15vw * var(--fit));
+	}
+	.split-text .info-grid--odd div:last-child {
+		grid-column: 1 / -1;
+	}
+	.split-text .info-grid dt {
+		margin-bottom: calc(0.35vh * var(--fit));
+	}
+
+	/* Tabs template: the list of pieces, as a dashed grid like the details box */
+	.info-box--pieces {
+		padding: 0;
+		overflow: hidden;
+		margin-bottom: calc(1.5vh * var(--fit));
+	}
+	.info-box--pieces .label {
+		padding: calc(1.1vh * var(--fit)) calc(1.15vw * var(--fit)) calc(0.9vh * var(--fit));
+		margin: 0;
+	}
+	.pieces-count {
+		margin-left: 0.6em;
+		color: var(--orange);
+	}
+	.pieces-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+	}
+	.piece-tab {
+		/* Each cell draws its top and left divider; the box clips the outer ones */
+		margin: 0 0 0 -2px;
+		border: 0;
+		border-top: 2px dashed currentColor;
+		border-left: 2px dashed currentColor;
+		background: none;
+		color: var(--navy);
+		font-family: var(--font-mono);
+		font-size: calc(min(0.78vw, 1.32vh) * var(--fit));
+		line-height: 1.25;
+		text-align: left;
+		padding: calc(0.75vh * var(--fit)) calc(0.9vw * var(--fit));
+		min-height: calc(3.6vh * var(--fit));
+		cursor: pointer;
+		overflow-wrap: anywhere;
+	}
+	.piece-tab:hover {
+		color: var(--orange);
+	}
+	.piece-tab[aria-selected="true"] {
+		color: var(--orange);
+		text-decoration: underline;
+		text-underline-offset: 0.25em;
+	}
+	.piece-tab:focus-visible {
+		outline: 2px solid var(--orange);
+		outline-offset: -4px;
+	}
+	.piece-tab--all {
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+
+	/* Tabs pages: the shown piece starts at the top of the image side */
+	.piece-panels {
+		margin-top: -2.6vw;
+	}
+
+	/* Navy text in the pinned column uses the same mono face as the image captions */
+	.pitch,
+	.split-text dd,
+	.body--aside,
+	.body--after {
+		font-family: var(--font-mono);
+		letter-spacing: -0.01em;
 	}
 	dd {
 		margin: 0;
-		font-size: 1.47vw;
-		line-height: 1.49;
 	}
-	.intro :global(.cover) {
+
+	.split-text dt {
+		font-size: calc(min(0.7vw, 1.2vh) * var(--fit));
+	}
+	.split-text dd {
+		margin: 0;
+		font-size: calc(min(0.92vw, 1.55vh) * var(--fit));
+		line-height: 1.35;
+	}
+	.body--aside {
+		font-size: calc(min(0.92vw, 1.58vh) * var(--fit));
+		line-height: 1.5;
+	}
+	.body--aside :global(p:last-child) {
+		margin-bottom: 0;
+	}
+	.body--aside :global(p) {
+		margin-bottom: 0.8em;
+	}
+	/* Pager sits at the bottom of the pinned column */
+	.split-text :global(.pager) {
+		margin-top: auto;
+	}
+	/* Space between the last text box and the pager */
+	.info-box--about {
+		margin-bottom: calc(1.5vh * var(--fit));
+	}
+	.pager-bottom--story {
+		display: none;
+	}
+	.body--after {
+		display: none;
+	}
+	/* Images: about 30% smaller than before, right-aligned with room around them */
+	.split-media {
+		min-width: 0;
+		width: 41vw;
+		margin-left: auto;
+		padding: 2.4vh 3.13vw 0 0;
+		box-sizing: content-box;
+	}
+	.split-media :global(.cover),
+	.split-media :global(.cover img) {
+		display: block;
 		width: 100%;
 		height: auto;
-		align-self: start;
-	}
-	.intro :global(img.cover) {
-		aspect-ratio: auto;
 	}
 	.gallery {
 		display: grid;
@@ -184,108 +533,9 @@ const details = [
 		width: 100%;
 		height: auto;
 	}
-	.gallery :global(img.shot) {
-		aspect-ratio: auto;
-	}
-	/* ---------- "Tabs" template: a navy sidebar of tabs on the left, styled like the site nav ---------- */
-	.pieces {
-		display: grid;
-		grid-template-columns: 18vw 1fr;
-		align-items: start;
-		margin: 0.94vw -0.94vw 0;
-		/* Navy runs the full height of the tab column while the tabs themselves stay pinned */
-		background: linear-gradient(to right, var(--navy) 18vw, transparent 18vw);
-	}
-	.piece-tabs {
-		position: sticky;
-		top: 0;
-		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
-		gap: 0.2vw;
-		max-height: 100vh;
-		overflow-y: auto;
-		scrollbar-width: none;
-		padding: 1.56vw 0 1.56vw 1.56vw;
-	}
-	.piece-tabs::-webkit-scrollbar {
-		display: none;
-	}
-	.piece-tab {
-		flex: 0 0 auto;
+	.gallery :global(.shot img) {
 		width: 100%;
-		height: 2.2vw;
-		padding: 0 1.1vw;
-		border: 0;
-		/* Rounded on the left, open on the right where it meets the content */
-		border-radius: 1.1vw 0 0 1.1vw;
-		background: var(--orange);
-		color: var(--navy);
-		font-size: 1.094vw;
-		font-weight: 600;
-		letter-spacing: 0.05em;
-		text-align: left;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		cursor: pointer;
-		transition: background-color 0.15s ease;
-	}
-	.piece-tab:hover {
-		background: #f0901f;
-	}
-	.piece-tab[aria-selected="true"] {
-		background: var(--bg);
-	}
-	.piece-panels {
-		min-width: 0;
-		padding: 0 0.94vw 0 1.88vw;
-	}
-	.piece {
-		padding-top: 1.56vw;
-	}
-	.piece + .piece {
-		padding-top: 3vw;
-	}
-	.piece[hidden] {
-		display: none;
-	}
-	.piece-header {
-		padding: 0 0 1.25vw;
-	}
-	.piece-title {
-		margin: 0;
-		color: var(--orange);
-		font-size: 3vw;
-		font-weight: 400;
-		letter-spacing: -0.02em;
-		line-height: 1;
-	}
-	.piece-caption {
-		margin: 0.6vw 0 0;
-		max-width: 43.75vw;
-		font-size: 1.47vw;
-		line-height: 1.4;
-	}
-	.piece .gallery {
-		margin-top: 0;
-	}
-
-	.pager {
-		display: flex;
-		justify-content: space-between;
-		gap: 2vw;
-		margin-top: 3vw;
-		padding: 0 1.71vw;
-		font-size: 1.25vw;
-		font-weight: 600;
-	}
-	.pager a {
-		color: var(--orange);
-		text-decoration: none;
-	}
-	.pager a:hover {
-		text-decoration: underline;
+		height: auto;
 	}
 
 	/* ---------- Phones: cover first, then the text ---------- */
@@ -304,6 +554,107 @@ const details = [
 		.intro :global(.cover) {
 			grid-row: 1;
 		}
+		/* Story layout on phones: tight intro (title, pitch, 2x2 details), then the photos,
+		   with the description after the first group */
+		.split {
+			grid-template-columns: minmax(0, 1fr);
+			margin: 0;
+		}
+		.split::before {
+			display: none;
+		}
+		.split-text {
+			position: static;
+			height: auto;
+			overflow: visible;
+			padding: 0;
+		}
+		.split-text h1 {
+			font-size: 8.72vw;
+		}
+		.pitch {
+			margin-top: 12px;
+			font-size: 17px;
+			line-height: 1.35;
+		}
+		.info-box {
+			padding: 12px 14px;
+			margin-top: 12px;
+		}
+		.info-box .label {
+			font-size: 11px;
+			margin-bottom: 6px;
+		}
+		.split-text .info-grid {
+			padding: 0;
+		}
+		.split-text .info-grid div {
+			padding: 10px 14px;
+		}
+		.info-box--about {
+			display: none;
+		}
+		.piece-panels {
+			margin-top: -36px;
+		}
+		/* Pieces: one swipeable row of names */
+		.info-box--pieces {
+			padding: 0;
+		}
+		.info-box--pieces .label {
+			padding: 12px 14px 8px;
+		}
+		.pieces-grid {
+			display: flex;
+			overflow-x: auto;
+			scroll-snap-type: x proximity;
+			scrollbar-width: none;
+		}
+		.pieces-grid::-webkit-scrollbar {
+			display: none;
+		}
+		.piece-tab {
+			flex: 0 0 auto;
+			min-height: 44px;
+			padding: 0 14px;
+			font-size: 12.5px;
+			white-space: nowrap;
+			scroll-snap-align: start;
+		}
+
+		.split-text dt {
+			font-size: 11px;
+		}
+		.split-text dd {
+			font-size: 14px;
+		}
+		.split-text :global(.pager) {
+			display: none;
+		}
+		.pager-bottom--story {
+			display: block;
+		}
+		.body--aside {
+			display: none;
+		}
+		.body--after {
+			display: block;
+			margin: 32px 0 0;
+			font-size: 14px;
+			line-height: 1.5;
+		}
+		.body--after .body {
+			margin: 0;
+			font-size: inherit;
+		}
+		.body--after :global(p:last-child) {
+			margin-bottom: 0;
+		}
+		.split-media {
+			width: auto;
+			margin: 0;
+			padding: 24px 0 0;
+		}
 		.text {
 			padding-top: 39px;
 		}
@@ -314,109 +665,128 @@ const details = [
 			font-size: 5.13vw;
 			margin-top: 38px;
 		}
-		dl {
-			margin-top: 40px;
+		/* Details as a compact 2 x 2 grid */
+		.details {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			column-gap: 14px;
+			margin-top: 18px;
 		}
-		dl div {
+		.details div {
 			min-height: 0;
-			padding: 10px 0 14px;
+			padding: 8px 0 10px;
 		}
 		dt {
-			font-size: 4.1vw;
+			font-size: 11px;
 		}
 		dd {
-			font-size: 4.6vw;
+			font-size: 14px;
+			line-height: 1.35;
 		}
 		.gallery {
 			grid-template-columns: 1fr;
 			gap: 12px;
 			margin-top: 40px;
 		}
-		/* Phones: not enough width for a sidebar, so the tabs become a scrolling strip on top */
-		.pieces {
-			grid-template-columns: 1fr;
-			margin: 0 -19px;
-			background: none;
-		}
-		.piece-tabs {
-			background: var(--navy);
-		}
-		.piece-tabs {
-			position: static;
-			flex-direction: row;
-			align-items: flex-end;
-			gap: 3px;
-			max-height: none;
-			overflow-x: auto;
-			overflow-y: hidden;
-			padding: 12px 19px 0;
-		}
-		.piece-tab {
-			width: auto;
-			height: 32px;
-			padding: 0 14px;
-			border-radius: 14px 14px 0 0;
-			font-size: 12px;
-			overflow: visible;
-		}
-		.piece-panels {
-			padding: 0 19px;
-		}
-		.piece,
-		.piece + .piece {
-			padding-top: 28px;
-		}
-		.piece-header {
-			padding: 0 0 14px;
-		}
-		.piece-title {
-			font-size: 24px;
-		}
-		.piece-caption {
-			max-width: none;
-			margin-top: 6px;
-			font-size: 15px;
-		}
-		.pager {
-			flex-direction: column;
-			gap: 12px;
-			margin-top: 36px;
-			padding: 0;
-			font-size: 13px;
-		}
+
 	}
 </style>
 
 <script>
-	// "Tabs" template: show one piece at a time, or all of them
-	for (const root of document.querySelectorAll<HTMLElement>("[data-pieces]")) {
-		const tabs = [...root.querySelectorAll<HTMLButtonElement>("[data-piece-tab]")];
-		const panels = [...root.querySelectorAll<HTMLElement>("[data-piece]")];
+	import PhotoSwipeLightbox from "photoswipe/lightbox";
+	import "photoswipe/style.css";
 
-		const select = (id: string, updateUrl: boolean) => {
+	// Full-screen viewer: click/tap any linked image. Arrow keys move, Esc closes.
+	const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+	const lightbox = new PhotoSwipeLightbox({
+		gallery: "[data-lightbox]",
+		// Skip photos in hidden pieces (Tabs template)
+		children: "a.lightbox-link:not([hidden] a)",
+		pswpModule: () => import("photoswipe"),
+		bgOpacity: 0.94,
+		showHideAnimationType: reduceMotion ? "none" : "zoom",
+		showAnimationDuration: reduceMotion ? 0 : 250,
+		hideAnimationDuration: reduceMotion ? 0 : 250,
+		zoomAnimationDuration: reduceMotion ? 0 : 250,
+		// Keep the close/arrow buttons on screen at all times
+		idleTime: 1e9,
+		tapAction: "close",
+		closeTitle: "Close (Esc)",
+		arrowPrevTitle: "Previous (left arrow)",
+		arrowNextTitle: "Next (right arrow)",
+	});
+	// Thumbnails are cropped to fit their row, so open from the cropped shape
+	lightbox.addFilter("domItemData", (itemData, element) => {
+		const img = element.querySelector("img");
+		if (img) {
+			itemData.alt = img.alt;
+			itemData.thumbCropped = true;
+		}
+		return itemData;
+	});
+	// Show the caption (or alt text) under the open image
+	lightbox.on("uiRegister", () => {
+		lightbox.pswp?.ui?.registerElement({
+			name: "caption",
+			order: 9,
+			isButton: false,
+			appendTo: "root",
+			onInit: (el, pswp) => {
+				pswp.on("change", () => {
+					const link = pswp.currSlide?.data.element;
+					const caption = link?.closest("figure")?.querySelector("figcaption")?.textContent;
+					el.textContent = caption || pswp.currSlide?.data.alt || "";
+				});
+			},
+		});
+	});
+	lightbox.init();
+
+	// Pinned text column: shrink its text a little until everything fits one screen
+	const pinned = document.querySelector<HTMLElement>(".split-text");
+	if (pinned) {
+		const fit = () => {
+			if (!matchMedia("(min-width: 750px)").matches) return;
+			let scale = 1;
+			pinned.style.setProperty("--fit", "1");
+			while (pinned.scrollHeight > pinned.clientHeight + 1 && scale > 0.55) {
+				scale -= 0.03;
+				pinned.style.setProperty("--fit", scale.toFixed(2));
+			}
+		};
+		fit();
+		addEventListener("resize", fit);
+		document.fonts?.ready.then(fit);
+	}
+
+	// Tabs template: the Pieces box (left) switches which piece shows on the image side.
+	// Opens on the first piece; "All" shows every piece; #piece-name links open that piece.
+	const tabs = [...document.querySelectorAll<HTMLButtonElement>("[data-piece-tab]")];
+	const panels = [...document.querySelectorAll<HTMLElement>("[data-piece]")];
+	if (tabs.length && panels.length) {
+		const panelArea = document.querySelector<HTMLElement>("[data-pieces]")!;
+		const select = (id: string, updateUrl: boolean, scroll: boolean) => {
 			for (const tab of tabs) tab.setAttribute("aria-selected", String(tab.dataset.pieceTab === id));
 			for (const panel of panels) panel.hidden = id !== "all" && panel.dataset.piece !== id;
 			// Pause videos in hidden pieces
-			for (const video of root.querySelectorAll<HTMLVideoElement>(".piece[hidden] video")) video.pause();
+			for (const video of panelArea.querySelectorAll<HTMLVideoElement>("[hidden] video")) video.pause();
 			if (updateUrl) history.replaceState(null, "", id === "all" ? location.pathname + location.search : `#${id}`);
+			// Bring the newly shown piece into view if it's above or below the screen
+			const target = id === "all" ? panelArea : panels.find((p) => p.dataset.piece === id);
+			if (scroll && target) {
+				const top = target.getBoundingClientRect().top;
+				if (top < 0 || top > innerHeight * 0.6) target.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+			}
 		};
-
 		for (const tab of tabs) {
 			tab.addEventListener("click", () => {
-				select(tab.dataset.pieceTab!, true);
+				select(tab.dataset.pieceTab!, true, true);
 				tab.scrollIntoView({ block: "nearest", inline: "nearest" });
-				// Jump back to the top of the pieces so the newly shown piece is in view
-				if (root.getBoundingClientRect().top < 0) root.scrollIntoView();
 			});
 		}
-
-		// Open a piece straight from a link like /works/one-thing-a-day/#candies
 		const openFromHash = () => {
 			const id = decodeURIComponent(location.hash.slice(1));
-			if (id && panels.some((p) => p.dataset.piece === id)) {
-				select(id, false);
-				root.scrollIntoView();
-			}
+			if (id && (id === "all" || panels.some((p) => p.dataset.piece === id))) select(id, false, true);
 		};
 		openFromHash();
 		addEventListener("hashchange", openFromHash);

@@ -44,14 +44,28 @@ Click **Works → Order** in the Pages CMS sidebar, drag projects up or down, an
 A new project you haven't placed yet appears at the end automatically.
 
 ### Templates
-Each project has a **Template** setting:
-- **Standard** (or empty): one photo grid, filled from **Gallery**.
-- **Tabs**: a row of tabs, one per piece, each with its own photos/videos and an
-  optional caption, filled from **Pieces**. Visitors can also link to a single
-  piece, e.g. `…/works/one-thing-a-day/#candies`. One Thing A Day uses this.
+Every project page has the title and text **pinned on the left** (In short,
+details, About the project, previous/next) and the **photos on the right**,
+two across on a dot grid. Each project's **Template** setting picks how the
+photos are organised:
+- **Standard** (or empty):
+  - If **Story gallery** is filled in, photos are shown in groups, each with a
+    heading, a one-line intro, and rows of 1 (Full), 2 (Pair) or 3 (Trio)
+    photos, each with a caption and a description (alt text). The PAPPY
+    Freedom Table uses this.
+  - Otherwise the plain **Gallery** is used: landscape photos go full width,
+    portrait photos pair up.
+- **Tabs**: the left side gets a **Pieces** box listing each piece; clicking
+  one shows its photos on the right, with its title and text under the first
+  photo. The page opens on the first piece, and **All** shows everything.
+  Visitors can link to a single piece, e.g. `…/works/one-thing-a-day/#004-painted-kettle`.
+  One Thing A Day and 3D Printing use this.
 
 To add a piece: open the project, scroll to **Pieces**, click **Add an entry**,
-give it a tab name, upload its photos, and save. Drag pieces to reorder tabs.
+give it a name, a sentence of text, upload its photos/videos, and save. Drag
+pieces to reorder them.
+
+Photos open full screen when clicked (arrow keys to move, Esc to close).
 
 ### Previewing a new project before it's public
 Tick **Draft** and save. The project won't be listed anywhere on the site, but

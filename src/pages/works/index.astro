@@ -28,7 +28,7 @@ const filters = ["All", ...categories];
 							{work.data.title}
 							{work.data.draft && <span class="draft mono">Draft</span>}
 						</span>
-						<Media src={workMedia(work.id, work.data.cover)} alt="" class="thumb" />
+						<Media src={workMedia(work.id, work.data.cover)} alt="" class="thumb" sizes="(max-width: 749px) 100vw, 11vw" widths={[240, 480, 800]} />
 					</a>
 				</li>
 			))}

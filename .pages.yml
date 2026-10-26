@@ -79,12 +79,16 @@ content:
             options:
               path: public/media/works
               categories: [image, video]
+          - name: coverAlt
+            label: Cover description (alt text)
+            type: string
+            description: Describe what's in the cover photo, for people using screen readers, e.g. "Friends around a cardboard table at a picnic".
           - name: template
             label: Template
             type: select
             description: >-
-              Standard = one photo grid (uses Gallery below).
-              Tabs = a tab for each piece, each with its own photos (uses Pieces below), like One Thing A Day.
+              Standard = text pinned on the left, photos two across on the right (uses Story gallery if filled in, otherwise Gallery).
+              Tabs = a Pieces list on the left; each piece shows its own photos on the right (uses Pieces below), like One Thing A Day.
               Leave empty for Standard.
             options:
               values:
@@ -95,11 +99,71 @@ content:
           - name: gallery
             label: Gallery (Standard template)
             type: file
-            description: Photos and videos shown in a grid. Please upload JPGs under 3 MB each (bigger files fail to upload).
+            description: Photos and videos shown two across (landscape photos go full width). Used when Story gallery is empty. Please upload JPGs under 3 MB each (bigger files fail to upload).
             options:
               path: public/media/works
               categories: [image, video]
               multiple: true
+          - name: story
+            label: Story gallery (Standard template)
+            type: object
+            description: >-
+              Groups of photos, each with a heading and rows. When filled in, this replaces the plain Gallery.
+              Row layouts: Full = 1 wide photo, Pair = 2 side by side, Trio = 3 in a row.
+            list:
+              collapsible:
+                collapsed: true
+                summary: "{heading}"
+            fields:
+              - name: heading
+                label: Heading
+                type: string
+                required: true
+              - name: intro
+                label: One-line intro (optional)
+                type: string
+              - name: rows
+                label: Rows
+                type: object
+                list:
+                  collapsible:
+                    collapsed: true
+                    summary: "{layout}"
+                fields:
+                  - name: layout
+                    label: Layout
+                    type: select
+                    options:
+                      values:
+                        - name: full
+                          label: Full (1 photo)
+                        - name: pair
+                          label: Pair (2 photos)
+                        - name: trio
+                          label: Trio (3 photos)
+                  - name: images
+                    label: Photos
+                    type: object
+                    list:
+                      collapsible:
+                        collapsed: true
+                        summary: "{caption}"
+                    fields:
+                      - name: src
+                        label: Photo
+                        type: file
+                        required: true
+                        options:
+                          path: public/media/works
+                          categories: [image, video]
+                      - name: alt
+                        label: Description (alt text)
+                        type: string
+                        description: What's in the photo, for screen readers.
+                      - name: caption
+                        label: Caption
+                        type: string
+                        description: Short text shown under the photo.
           - name: pieces
             label: Pieces (Tabs template)
             type: object
@@ -116,7 +180,7 @@ content:
               - name: caption
                 label: Caption (optional)
                 type: text
-                description: A sentence or two shown above this piece's photos.
+                description: A sentence or two shown under this piece's first photo.
               - name: media
                 label: Photos and videos
                 type: file

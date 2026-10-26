@@ -1,0 +1,307 @@
+---
+/**
+ * One group of the story gallery: a heading, an optional one-line intro, and
+ * rows laid out as full (1 image), pair (2) or trio (3). Rows whose image
+ * count doesn't match their layout are split so there are never orphans
+ * (e.g. a "pair" with 3 images becomes a pair + a full row).
+ */
+import Media from "./Media.astro";
+import { workMedia } from "../lib/works";
+
+type StoryImage = { src: string; alt?: string | null; caption?: string | null };
+type Row = { layout: "full" | "pair" | "trio"; images: StoryImage[] };
+
+interface Props {
+	workId: string;
+	/** Optional: groups made from a plain gallery have no heading */
+	heading?: string;
+	intro?: string | null;
+	rows: Row[];
+	sound: string[];
+	/** Used to build fallback alt text */
+	title: string;
+	/** Square frames instead of portrait (used by the Tabs template, whose media is square) */
+	square?: boolean;
+	/** Show the heading and intro under the first image (or first pair) instead of above */
+	headerBelowFirst?: boolean;
+	/** Anything else (id, data-*, role, hidden…) goes on the <section> */
+	[attr: string]: unknown;
+}
+
+const { workId, heading, intro, rows, sound, title, square = false, headerBelowFirst = false, ...attrs } = Astro.props;
+
+const perRow = { full: 1, pair: 2, trio: 3 } as const;
+const layoutFor = (count: number) => (count >= 3 ? "trio" : count === 2 ? "pair" : "full");
+const cleanRows: Row[] = rows.flatMap((row) => {
+	const size = perRow[row.layout] ?? 2;
+	const chunks: Row[] = [];
+	for (let i = 0; i < row.images.length; i += size) {
+		const images = row.images.slice(i, i + size);
+		chunks.push({ layout: images.length === size ? row.layout : layoutFor(images.length), images });
+	}
+	return chunks;
+});
+
+// Desktop shows every photo two across. "Full" photos span both columns, and
+// if a run of single photos is odd, its last photo spans both too, so there
+// are never orphans. (Phones keep the full / pair / trio rows.)
+const wide = new Set<StoryImage>();
+let run: StoryImage[] = [];
+const closeRun = () => {
+	if (run.length % 2 === 1) wide.add(run[run.length - 1]);
+	run = [];
+};
+for (const row of cleanRows) {
+	if (row.layout === "full") {
+		closeRun();
+		row.images.forEach((img) => wide.add(img));
+	} else {
+		run.push(...row.images);
+	}
+}
+closeRun();
+
+// How wide each image is shown, so the browser picks the right file size
+const sizesFor = (layout: Row["layout"], image: StoryImage) => {
+	const desktop = wide.has(image) ? "41vw" : "20vw";
+	const phone = layout === "full" ? "100vw" : layout === "trio" ? "72vw" : "50vw";
+	return `(max-width: 749px) ${phone}, ${desktop}`;
+};
+---
+
+<section class:list={["story-group", square && "story-group--square", headerBelowFirst && "story-group--header-below"]} {...attrs}>
+	{!headerBelowFirst && heading && (
+		<header class="story-header">
+			<h2 class="story-heading">{heading}</h2>
+			{intro && <p class="story-intro">{intro}</p>}
+		</header>
+	)}
+	<div class="story-rows">
+	{headerBelowFirst && heading && (
+		/* First in the code so screen readers hear it first; CSS shows it after the first image(s) */
+		<header class="story-header">
+			<h2 class="story-heading">{heading}</h2>
+			{intro && <p class="story-intro">{intro}</p>}
+		</header>
+	)}
+	{cleanRows.map((row, rowIndex) => (
+		<div class:list={["story-row", `story-row--${row.layout}`, rowIndex === 0 && "story-row--lead"]}>
+			{row.images.map((image) => (
+				<figure class:list={["story-item", wide.has(image) && "story-item--wide", rowIndex === 0 && "story-item--lead"]}>
+					<div class="story-frame">
+						<Media
+							src={workMedia(workId, image.src)}
+							alt={image.alt || image.caption || (heading ? `${title}: ${heading}` : title)}
+							class="story-media"
+							sizes={sizesFor(row.layout, image)}
+							sound={sound.includes(image.src)}
+							lightbox
+						/>
+					</div>
+					{image.caption && <figcaption class="story-caption">{image.caption}</figcaption>}
+				</figure>
+			))}
+		</div>
+	))}
+	</div>
+</section>
+
+<style>
+	/* Desktop: the right-hand image column, with small "micrographic" text */
+	.story-group {
+		margin-top: 2.6vw;
+	}
+	.story-header {
+		display: flex;
+		align-items: baseline;
+		gap: 1vw;
+		padding: 0 0 0.7vw;
+		border-bottom: 1px solid var(--orange);
+		margin-bottom: 0.7vw;
+	}
+	.story-heading {
+		margin: 0;
+		color: var(--orange);
+		font-family: var(--font-mono);
+		font-size: 0.78vw;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		line-height: 1.2;
+		white-space: nowrap;
+	}
+	.story-intro {
+		margin: 0;
+		font-family: var(--font-mono);
+		font-size: 0.66vw;
+		line-height: 1.4;
+		color: var(--navy);
+	}
+	/* Text sits on solid grey so the dot grid behind the images doesn't show through it */
+	.story-heading,
+	.story-intro,
+	.story-caption {
+		background: var(--bg);
+	}
+	.story-heading,
+	.story-intro {
+		padding: 0.15em 0;
+	}
+
+	/* Every photo two across; rows only matter on phones */
+	.story-rows {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.7vw;
+		align-items: start;
+	}
+	.story-row {
+		display: contents;
+	}
+	.story-item {
+		margin: 0;
+		min-width: 0;
+	}
+	.story-item--wide {
+		grid-column: 1 / -1;
+	}
+	/* Same shape for every photo in a row, so edges line up exactly */
+	.story-frame {
+		aspect-ratio: 3 / 4;
+		overflow: hidden;
+		background: var(--placeholder);
+	}
+	.story-item--wide .story-frame {
+		aspect-ratio: 3 / 2;
+	}
+	.story-group--square .story-frame,
+	.story-group--square .story-item--wide .story-frame {
+		aspect-ratio: 1;
+	}
+	.story-group[hidden] {
+		display: none;
+	}
+	/* Heading below the first image(s): reorder inside the two-column grid */
+	.story-group--header-below .story-rows > .story-header {
+		grid-column: 1 / -1;
+		order: 1;
+		margin: 0;
+		padding-top: 0.2vw;
+	}
+	.story-group--header-below .story-item {
+		order: 2;
+	}
+	.story-group--header-below .story-item--lead {
+		order: 0;
+	}
+	.story-frame :global(.story-media),
+	.story-frame :global(img),
+	.story-frame :global(video) {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.story-caption {
+		margin-top: 0.35vw;
+		padding-right: 0.6vw;
+		font-family: var(--font-mono);
+		font-size: 0.6vw;
+		letter-spacing: 0.01em;
+		line-height: 1.45;
+		color: var(--navy);
+	}
+
+	/* ---------- Phones ---------- */
+	@media (max-width: 749px) {
+		.story-group {
+			margin-top: 36px;
+		}
+		.story-rows {
+			display: block;
+		}
+		/* Heading below the first row on phones too */
+		.story-group--header-below .story-rows {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+		.story-group--header-below .story-row + .story-row {
+			margin-top: 0;
+		}
+		.story-group--header-below .story-rows > .story-header {
+			order: 1;
+			margin: 2px 0 0;
+		}
+		.story-group--header-below .story-row {
+			order: 2;
+		}
+		.story-group--header-below .story-row--lead {
+			order: 0;
+		}
+		.story-row {
+			display: grid;
+			align-items: start;
+		}
+		.story-row--full {
+			grid-template-columns: 1fr;
+		}
+		.story-row--pair {
+			grid-template-columns: 1fr 1fr;
+		}
+		.story-item--wide {
+			grid-column: auto;
+		}
+		.story-item--wide .story-frame {
+			aspect-ratio: 3 / 4;
+		}
+		.story-group--square .story-frame,
+		.story-group--square .story-item--wide .story-frame,
+		.story-group--square .story-row--full .story-frame {
+			aspect-ratio: 1;
+		}
+		.story-header {
+			display: block;
+			padding: 0 0 8px;
+			margin-bottom: 10px;
+		}
+		.story-heading {
+			font-size: 12px;
+		}
+		.story-intro {
+			margin-top: 4px;
+			font-size: 11.5px;
+		}
+		.story-row {
+			gap: 8px;
+		}
+		.story-row + .story-row {
+			margin-top: 8px;
+		}
+		.story-row--full .story-frame {
+			aspect-ratio: 4 / 3;
+		}
+		/* Trio: a swipeable row that snaps to each image */
+		.story-row--trio {
+			display: flex;
+			overflow-x: auto;
+			scroll-snap-type: x mandatory;
+			scroll-padding: 0 19px;
+			margin: 0 -19px;
+			padding: 0 19px 4px;
+			scrollbar-width: none;
+		}
+		.story-row--trio::-webkit-scrollbar {
+			display: none;
+		}
+		.story-row--trio .story-item {
+			flex: 0 0 72%;
+			scroll-snap-align: start;
+		}
+		.story-caption {
+			margin-top: 5px;
+			padding-right: 4px;
+			font-size: 10.5px;
+		}
+	}
+</style>

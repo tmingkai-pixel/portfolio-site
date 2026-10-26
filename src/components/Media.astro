@@ -2,9 +2,20 @@
 /**
  * Shows an image or video from public/media/. If the file isn't there yet,
  * renders a labelled placeholder so you can see where it needs to go.
+ *
+ * Images go through Astro's <Picture />, which generates AVIF/WebP at several
+ * widths and sets width/height so nothing shifts while loading. The files stay
+ * in public/media (where Pages CMS uploads them); import.meta.glob lets Astro
+ * process them from there.
  */
 import fs from "node:fs";
 import path from "node:path";
+import { Picture } from "astro:assets";
+
+const images = import.meta.glob<{ default: ImageMetadata }>(
+	"/public/media/**/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}",
+	{ eager: true },
+);
 
 interface Props {
 	/** Path inside public/media/, e.g. "works/uniqlo-sustainability-pop-up/cover.jpg" */
@@ -15,14 +26,32 @@ interface Props {
 	ambient?: boolean;
 	/** Video only: has a soundtrack worth hearing, so show a "Sound on" button */
 	sound?: boolean;
-	/** Image only: load immediately instead of when scrolled near (use for the top image) */
+	/** Image only: load immediately with high priority (use for the top image only) */
 	eager?: boolean;
+	/** Image only: the `sizes` hint, i.e. how wide the image is shown */
+	sizes?: string;
+	/** Image only: widths to generate */
+	widths?: number[];
+	/** Image only: wrap in a link that opens the full-screen viewer */
+	lightbox?: boolean;
 }
 
-const { src, alt = "", class: className, ambient = true, sound = false, eager = false } = Astro.props;
+const {
+	src,
+	alt = "",
+	class: className,
+	ambient = true,
+	sound = false,
+	eager = false,
+	sizes = "100vw",
+	widths = [480, 800, 1200, 1600],
+	lightbox = false,
+} = Astro.props;
 const exists = fs.existsSync(path.join(process.cwd(), "public", "media", src));
 const url = `${import.meta.env.BASE_URL}media/${src}`;
 const isVideo = /\.(mp4|webm|mov)$/i.test(src);
+const image = images[`/public/media/${src}`]?.default;
+const usableWidths = image ? [...widths.filter((w) => w < image.width), image.width] : [];
 ---
 
 {!exists ? (
@@ -40,8 +69,39 @@ const isVideo = /\.(mp4|webm|mov)$/i.test(src);
 	) : (
 		<video class={className} src={url} controls playsinline aria-label={alt} />
 	)
+) : image && lightbox ? (
+	<a
+		href={url}
+		class:list={["lightbox-link", className]}
+		data-pswp-width={image.width}
+		data-pswp-height={image.height}
+		aria-label={alt ? `View larger: ${alt}` : "View larger"}
+	>
+		<Picture
+			src={image}
+			alt={alt}
+			widths={usableWidths}
+			sizes={sizes}
+			formats={["avif", "webp"]}
+			loading={eager ? "eager" : "lazy"}
+			fetchpriority={eager ? "high" : "auto"}
+			pictureAttributes={{ style: "display: contents" }}
+		/>
+	</a>
+) : image ? (
+	<Picture
+		src={image}
+		alt={alt}
+		class={className}
+		widths={usableWidths}
+		sizes={sizes}
+		formats={["avif", "webp"]}
+		loading={eager ? "eager" : "lazy"}
+		fetchpriority={eager ? "high" : "auto"}
+		pictureAttributes={{ style: "display: contents" }}
+	/>
 ) : (
-	<img class={className} src={url} alt={alt} loading={eager ? "eager" : "lazy"} decoding="async" />
+	<img class:list={["plain-img", className]} src={url} alt={alt} loading={eager ? "eager" : "lazy"} decoding="async" />
 )}
 
 <style>
@@ -59,9 +119,22 @@ const isVideo = /\.(mp4|webm|mov)$/i.test(src);
 	video {
 		object-fit: cover;
 	}
-	/* Reserve a square until the real size is known, so lazy images aren't 0px tall */
-	img {
+	/* Images without known dimensions: reserve a square until they load */
+	.plain-img {
 		aspect-ratio: auto 1 / 1;
+	}
+	.lightbox-link {
+		display: block;
+		cursor: zoom-in;
+	}
+	.lightbox-link img {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+	.lightbox-link:focus-visible {
+		outline: 3px solid var(--navy);
+		outline-offset: 2px;
 	}
 	.sound-wrap {
 		position: relative;
@@ -74,13 +147,14 @@ const isVideo = /\.(mp4|webm|mov)$/i.test(src);
 		position: absolute;
 		right: 0.6rem;
 		bottom: 0.6rem;
+		min-height: 44px;
 		background: var(--orange);
 		color: var(--navy);
 		border: 0;
 		border-radius: 999px;
-		font-size: 0.65rem;
+		font-size: 0.7rem;
 		font-weight: 700;
-		padding: 0.3rem 0.7rem;
+		padding: 0.3rem 0.9rem;
 		cursor: pointer;
 	}
 </style>

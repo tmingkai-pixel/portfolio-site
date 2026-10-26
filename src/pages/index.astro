@@ -51,6 +51,8 @@ const bio = (home.bio ?? []).filter(Boolean).map((paragraph: string) =>
 						src={workMedia(work.id, work.data.cover)}
 						alt={work.data.title}
 						class="gallery-media"
+						sizes="(max-width: 749px) 85vw, 45vw"
+						widths={[400, 700, 1000]}
 					/>
 					<span class="gallery-caption mono">{work.data.title}</span>
 				</a>

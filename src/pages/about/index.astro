@@ -22,7 +22,7 @@ const experience = (about.experience ?? []).map((job) => ({
 			<h1 class="display">About</h1>
 
 			<div class="card">
-				<Media src={mediaPath(about.portrait || "/media/about/portrait.jpg")} alt={`Portrait of ${name}`} class="portrait" eager />
+				<Media src={mediaPath(about.portrait || "/media/about/portrait.jpg")} alt={`Portrait of ${name}`} class="portrait" sizes="(max-width: 749px) 30vw, 15vw" widths={[200, 400, 600]} eager />
 				<h2 class="name mono">{name}</h2>
 				<p class="intro">{intro}</p>
 			</div>
