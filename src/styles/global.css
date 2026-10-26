@@ -7,6 +7,8 @@
  * so every screen size shows the same layout, just scaled.
  */
 :root {
+	/* Light-only design: opt out of browsers' automatic dark modes */
+	color-scheme: only light;
 	--bg: #d9d9d9;
 	--orange: #e17b0a;
 	--navy: #1c3184;
