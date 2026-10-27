@@ -43,6 +43,35 @@ const hasInfo = Astro.slots.has("info");
 		{noindex && <meta name="robots" content="noindex, nofollow" />}
 		<meta name="generator" content={Astro.generator} />
 		<title>{title === "Home" ? "Tan Ming-Kai" : `${title} | Tan Ming-Kai`}</title>
+		<script is:inline>
+			// Page-to-page transitions: photos that are on screen on both pages glide from
+			// their old spot to their new one; everything else crossfades. Only on-screen
+			// photos get a transition name, so off-screen ones don't fly in from afar.
+			(function () {
+				function nameOnScreen() {
+					var named = [];
+					document.querySelectorAll("[data-vt]").forEach(function (el) {
+						var r = el.getBoundingClientRect();
+						if (r.width > 0 && r.bottom > 0 && r.top < innerHeight) {
+							el.style.viewTransitionName = el.getAttribute("data-vt");
+							named.push(el);
+						}
+					});
+					return named;
+				}
+				function clear(named) {
+					named.forEach(function (el) { el.style.viewTransitionName = ""; });
+				}
+				addEventListener("pageswap", function (e) {
+					if (e.viewTransition) nameOnScreen();
+				});
+				addEventListener("pagereveal", function (e) {
+					if (!e.viewTransition) return;
+					var named = nameOnScreen();
+					e.viewTransition.finished.then(function () { clear(named); });
+				});
+			})();
+		</script>
 	</head>
 	<body>
 		<slot name="before" />

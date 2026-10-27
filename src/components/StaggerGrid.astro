@@ -11,11 +11,13 @@ type Item = { src: string; alt: string; sound?: boolean };
 interface Props {
 	/** `src` is a path inside public/media/ */
 	items: Item[];
+	/** Load the first photos straight away (only for a grid that's visible on arrival) */
+	eager?: boolean;
 	/** Anything else (id, data-*, role, hidden…) goes on the wrapper */
 	[attr: string]: unknown;
 }
 
-const { items, ...attrs } = Astro.props;
+const { items, eager = false, ...attrs } = Astro.props;
 const columns: Item[][] = [[], []];
 items.forEach((item, i) => columns[i % 2].push(item));
 ---
@@ -23,8 +25,9 @@ items.forEach((item, i) => columns[i % 2].push(item));
 <div class="stagger" {...attrs}>
 	{columns.map((column, c) => (
 		<div class:list={["stagger-col", c === 1 && "stagger-col--offset"]}>
-			{column.map((item) => (
+			{column.map((item, row) => (
 				<Media
+					eager={eager && row < 2}
 					src={item.src}
 					alt={item.alt}
 					class="stagger-media"

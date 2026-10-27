@@ -52,6 +52,11 @@ const url = `${import.meta.env.BASE_URL}media/${src}`;
 const isVideo = /\.(mp4|webm|mov)$/i.test(src);
 const image = images[`/public/media/${src}`]?.default;
 const usableWidths = image ? [...widths.filter((w) => w < image.width), image.width] : [];
+// Stable name for page-to-page transitions: the same photo on two pages glides
+// between them (names are switched on for on-screen photos by AppShell's script)
+let hash = 5381;
+for (const ch of src) hash = ((hash * 33) ^ ch.charCodeAt(0)) >>> 0;
+const vt = `vt-${hash.toString(36)}`;
 ---
 
 {!exists ? (
@@ -61,11 +66,11 @@ const usableWidths = image ? [...widths.filter((w) => w < image.width), image.wi
 ) : isVideo ? (
 	ambient && sound ? (
 		<div class:list={["sound-wrap", className]}>
-			<video src={url} data-ambient muted loop playsinline preload="metadata" aria-label={alt} />
+			<video src={url} data-ambient data-vt={vt} muted loop playsinline preload="metadata" aria-label={alt} />
 			<button type="button" class="sound-toggle mono" data-sound-toggle aria-pressed="false">Sound on</button>
 		</div>
 	) : ambient ? (
-		<video class={className} src={url} data-ambient muted loop playsinline preload="metadata" aria-label={alt} />
+		<video class={className} src={url} data-ambient data-vt={vt} muted loop playsinline preload="metadata" aria-label={alt} />
 	) : (
 		<video class={className} src={url} controls playsinline aria-label={alt} />
 	)
@@ -86,6 +91,7 @@ const usableWidths = image ? [...widths.filter((w) => w < image.width), image.wi
 			loading={eager ? "eager" : "lazy"}
 			fetchpriority={eager ? "high" : "auto"}
 			pictureAttributes={{ style: "display: contents" }}
+			data-vt={vt}
 		/>
 	</a>
 ) : image ? (
@@ -99,6 +105,7 @@ const usableWidths = image ? [...widths.filter((w) => w < image.width), image.wi
 		loading={eager ? "eager" : "lazy"}
 		fetchpriority={eager ? "high" : "auto"}
 		pictureAttributes={{ style: "display: contents" }}
+		data-vt={vt}
 	/>
 ) : (
 	<img class:list={["plain-img", className]} src={url} alt={alt} loading={eager ? "eager" : "lazy"} decoding="async" />

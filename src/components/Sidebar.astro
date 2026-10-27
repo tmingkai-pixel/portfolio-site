@@ -65,6 +65,8 @@ const works = await getWorks();
 		z-index: 3; /* column 2 slides in from underneath */
 		height: 100vh;
 		background: var(--bg);
+		/* Captured separately, so it doesn't fade when changing page */
+		view-transition-name: sidebar;
 		font-family: var(--font-mono);
 		color: var(--navy);
 	}
