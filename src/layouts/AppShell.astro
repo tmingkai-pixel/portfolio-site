@@ -123,34 +123,6 @@ const hasInfo = Astro.slots.has("info");
 				}
 			});
 
-			// Tabs projects: the Pieces list (column 2) switches which piece's photos show,
-			// and which blurb shows in the info card. Opens on "All"; #piece links work.
-			const selectPiece = (id: string, updateUrl: boolean) => {
-				const panels = [...document.querySelectorAll<HTMLElement>("[data-track] [data-piece]")];
-				if (!panels.some((p) => p.dataset.piece === id)) return false;
-				for (const tab of document.querySelectorAll<HTMLElement>("[data-piece-tab]")) tab.setAttribute("aria-selected", String(tab.dataset.pieceTab === id));
-				for (const panel of panels) panel.hidden = panel.dataset.piece !== id;
-				for (const blurb of document.querySelectorAll<HTMLElement>("[data-piece-info]")) blurb.hidden = blurb.dataset.pieceInfo !== id;
-				for (const video of document.querySelectorAll<HTMLVideoElement>("[data-piece][hidden] video")) video.pause();
-				if (updateUrl) history.replaceState(history.state, "", `#${id}`);
-				// Show the new piece's photos from the top
-				const panel = panels.find((p) => p.dataset.piece === id);
-				if (panel && panel.getBoundingClientRect().top < 0) scrollTo({ top: 0 });
-				return true;
-			};
-			document.addEventListener("click", (event) => {
-				const tab = (event.target as HTMLElement).closest<HTMLElement>("[data-piece-tab]");
-				if (tab) selectPiece(tab.dataset.pieceTab!, true);
-			});
-			const openFromHash = () => {
-				const id = decodeURIComponent(location.hash.slice(1));
-				if (id && selectPiece(id, false)) {
-					document.querySelector(`[data-piece-tab="${CSS.escape(id)}"]`)?.scrollIntoView({ block: "nearest" });
-				}
-			};
-			openFromHash();
-			addEventListener("hashchange", openFromHash);
-
 			// ---------- Moving between pages ----------
 			// Menu and collage links load the next page in place, so the old columns can
 			// slide out while the new ones slide in. Direction follows the menu:
@@ -214,6 +186,40 @@ const hasInfo = Astro.slots.has("info");
 				app.append(el);
 			};
 
+			// Pin the on-screen part of some images in a fixed layer, so they can slide
+			// away while new ones take their place
+			const pinImages = (el: HTMLElement, rect: DOMRect) => {
+				const layer = document.createElement("div");
+				layer.className = "images-leaving";
+				layer.setAttribute("aria-hidden", "true");
+				Object.assign(layer.style, {
+					position: "fixed",
+					top: "0",
+					left: `${rect.left}px`,
+					width: `${rect.width}px`,
+					height: "100vh",
+					overflow: "hidden",
+					pointerEvents: "none",
+				});
+				el.style.transform = `translateY(${rect.top}px)`;
+				layer.append(el);
+				app.append(layer);
+				return layer;
+			};
+
+			// After a jump back to the top, ease the dots into line instead of jumping
+			const settleDots = (lag: number, delay: number) => {
+				const start = performance.now();
+				const settle = (now: number) => {
+					const t = Math.min(1, Math.max(0, now - start - delay) / DURATION);
+					dotLag = (lag - scrollY * 0.5) * (1 - (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2));
+					placeDots();
+					if (t < 1) requestAnimationFrame(settle);
+				};
+				dotLag = lag;
+				requestAnimationFrame(settle);
+			};
+
 			let currentPath = location.pathname;
 			history.scrollRestoration = "manual";
 
@@ -265,23 +271,8 @@ const hasInfo = Astro.slots.has("info");
 
 				// Old images: clip to what's on screen, pin there
 				const oldTrack = main.querySelector<HTMLElement>("[data-track]")!;
-				const trackRect = oldTrack.getBoundingClientRect();
-				const leaving = document.createElement("div");
-				leaving.className = "images-leaving";
-				leaving.setAttribute("aria-hidden", "true");
-				Object.assign(leaving.style, {
-					position: "fixed",
-					top: "0",
-					left: `${trackRect.left}px`,
-					width: `${trackRect.width}px`,
-					height: "100vh",
-					overflow: "hidden",
-					pointerEvents: "none",
-				});
-				oldTrack.style.transform = `translateY(${trackRect.top}px)`;
 				oldTrack.removeAttribute("data-track");
-				leaving.append(oldTrack);
-				app.append(leaving);
+				const leaving = pinImages(oldTrack, oldTrack.getBoundingClientRect());
 
 				// Old column 2: pin it too
 				const oldInfo = app.querySelector<HTMLElement>(":scope > .info");
@@ -337,17 +328,62 @@ const hasInfo = Astro.slots.has("info");
 					slide(newInfo, "translateX(-100%)", "none");
 				}
 
-				// Bring the dots back into line with the top of the page
-				const start = performance.now();
-				const settle = (now: number) => {
-					const t = Math.min(1, Math.max(0, now - start - IMAGES_LAG) / DURATION);
-					dotLag = (lag - scrollY * 0.5) * (1 - (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2));
-					placeDots();
-					if (t < 1) requestAnimationFrame(settle);
-				};
-				dotLag = lag;
-				requestAnimationFrame(settle);
+				settleDots(lag, IMAGES_LAG);
 			};
+
+			// Tabs projects: the Pieces list (column 2) switches which piece's photos show,
+			// and which blurb shows in the info card. Opens on "All"; #piece links work.
+			// When clicked, the photos slide like a page change: a piece further down the
+			// list comes up from below, one higher up comes down from above.
+			const selectPiece = (id: string, updateUrl: boolean, animate = false) => {
+				const panels = [...document.querySelectorAll<HTMLElement>("[data-track] [data-piece]")];
+				const panel = panels.find((p) => p.dataset.piece === id);
+				const oldPanel = panels.find((p) => !p.hidden);
+				if (!panel) return false;
+				if (panel === oldPanel) return true;
+				for (const animation of running) animation.finish();
+				running = [];
+
+				const tabs = [...document.querySelectorAll<HTMLElement>("[data-piece-tab]")];
+				const order = (pieceId?: string) => tabs.findIndex((t) => t.dataset.pieceTab === pieceId);
+				const up = order(id) > order(oldPanel?.dataset.piece);
+				let leaving: HTMLElement | null = null;
+				const lag = scrollY * 0.5 + dotLag;
+				if (animate && oldPanel) {
+					const copy = oldPanel.cloneNode(true) as HTMLElement;
+					copy.removeAttribute("id");
+					leaving = pinImages(copy, oldPanel.getBoundingClientRect());
+				}
+
+				for (const tab of tabs) tab.setAttribute("aria-selected", String(tab.dataset.pieceTab === id));
+				for (const p of panels) p.hidden = p !== panel;
+				for (const blurb of document.querySelectorAll<HTMLElement>("[data-piece-info]")) blurb.hidden = blurb.dataset.pieceInfo !== id;
+				for (const video of document.querySelectorAll<HTMLVideoElement>("[data-piece][hidden] video")) video.pause();
+				if (updateUrl) history.replaceState(history.state, "", `#${id}`);
+
+				// Show the new piece's photos from the top
+				if (leaving) {
+					scrollTo(0, 0);
+					slide(leaving, "none", up ? "translateY(-100vh)" : "translateY(100vh)", true);
+					slide(panel, up ? "translateY(100vh)" : "translateY(-100vh)", "none", true);
+					settleDots(lag, 0);
+				} else if (panel.getBoundingClientRect().top < 0) {
+					scrollTo({ top: 0 });
+				}
+				return true;
+			};
+			document.addEventListener("click", (event) => {
+				const tab = (event.target as HTMLElement).closest<HTMLElement>("[data-piece-tab]");
+				if (tab) selectPiece(tab.dataset.pieceTab!, true, !reduceMotion);
+			});
+			const openFromHash = () => {
+				const id = decodeURIComponent(location.hash.slice(1));
+				if (id && selectPiece(id, false)) {
+					document.querySelector(`[data-piece-tab="${CSS.escape(id)}"]`)?.scrollIntoView({ block: "nearest" });
+				}
+			};
+			openFromHash();
+			addEventListener("hashchange", openFromHash);
 
 			if (!reduceMotion) {
 				document.addEventListener("click", (event) => {
