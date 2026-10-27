@@ -61,9 +61,9 @@ photos are organised:
     Freedom Table uses this.
   - Otherwise the plain **Gallery** is used: landscape photos go full width,
     portrait photos pair up.
-- **Tabs**: the left side gets a **Pieces** box listing each piece; clicking
-  one shows its photos on the right, with its title and text under the first
-  photo. The page opens on the first piece, and **All** shows everything.
+- **Tabs**: column 2 gets a **Pieces** box listing each piece; clicking one
+  shows its photos on the right and its title and text above the list. The
+  page opens on **All**, which shows every piece's photos together.
   Visitors can link to a single piece, e.g. `…/works/one-thing-a-day/#004-painted-kettle`.
   One Thing A Day and 3D Printing use this.
 

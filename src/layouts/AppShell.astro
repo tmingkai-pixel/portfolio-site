@@ -124,7 +124,7 @@ const hasInfo = Astro.slots.has("info");
 			});
 
 			// Tabs projects: the Pieces list (column 2) switches which piece's photos show,
-			// and which blurb shows in the info card. Opens on the first piece; #piece links work.
+			// and which blurb shows in the info card. Opens on "All"; #piece links work.
 			const selectPiece = (id: string, updateUrl: boolean) => {
 				const panels = [...document.querySelectorAll<HTMLElement>("[data-track] [data-piece]")];
 				if (!panels.some((p) => p.dataset.piece === id)) return false;

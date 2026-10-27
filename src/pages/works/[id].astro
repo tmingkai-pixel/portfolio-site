@@ -36,6 +36,9 @@ const pieces = isTabs
 			})),
 		}))
 	: [];
+// Tabs projects open on "All": every piece's photos together
+const allId = ids.includes("all") ? "all-pieces" : "all";
+const allItems = pieces.flatMap((piece) => piece.items);
 
 // Standard projects: story groups (headings + captions) when present,
 // otherwise the plain Gallery, in two staggered columns. The cover leads.
@@ -96,8 +99,14 @@ const details: [string, string | null | undefined][] = [
 						<dd class="card-text">{data.doneUnder}</dd>
 					</dl>
 				)}
-				{isTabs && pieces.map((piece, i) => (
-					<section class="card-row card-row--piece" data-piece-info={piece.id} hidden={i !== 0}>
+				{isTabs && (
+					<section class="card-row card-row--piece" data-piece-info={allId}>
+						<h2 class="piece-name">All</h2>
+						<p class="card-text">Every piece together. Pick one from the list below to see it on its own.</p>
+					</section>
+				)}
+				{isTabs && pieces.map((piece) => (
+					<section class="card-row card-row--piece" data-piece-info={piece.id} hidden>
 						<h2 class="piece-name">{piece.title}</h2>
 						<p class="card-text">{piece.caption}</p>
 					</section>
@@ -110,8 +119,11 @@ const details: [string, string | null | undefined][] = [
 			<section class="scroll-box" aria-labelledby="pieces-label">
 				<h2 class="card-label scroll-box__label" id="pieces-label">Pieces <span class="count">{pieces.length}</span></h2>
 				<div class="scroll-box__body pieces" role="tablist" aria-labelledby="pieces-label">
-					{pieces.map((piece, i) => (
-						<button type="button" role="tab" class="piece-tab" data-piece-tab={piece.id} aria-controls={piece.id} aria-selected={i === 0 ? "true" : "false"}>
+					<button type="button" role="tab" class="piece-tab" data-piece-tab={allId} aria-controls={allId} aria-selected="true">
+						All
+					</button>
+					{pieces.map((piece) => (
+						<button type="button" role="tab" class="piece-tab" data-piece-tab={piece.id} aria-controls={piece.id} aria-selected="false">
 							{piece.title}
 						</button>
 					))}
@@ -125,8 +137,11 @@ const details: [string, string | null | undefined][] = [
 		)}
 	</Fragment>
 
-	{isTabs && pieces.map((piece, i) => (
-		<StaggerGrid items={piece.items} eager={i === 0} id={piece.id} data-piece={piece.id} role="tabpanel" aria-label={piece.title} hidden={i !== 0} />
+	{isTabs && (
+		<StaggerGrid items={allItems} eager id={allId} data-piece={allId} role="tabpanel" aria-label="All pieces" />
+	)}
+	{isTabs && pieces.map((piece) => (
+		<StaggerGrid items={piece.items} id={piece.id} data-piece={piece.id} role="tabpanel" aria-label={piece.title} hidden />
 	))}
 
 	{story.length > 0 && (
