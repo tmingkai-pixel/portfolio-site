@@ -43,6 +43,16 @@ const hasInfo = Astro.slots.has("info");
 		{noindex && <meta name="robots" content="noindex, nofollow" />}
 		<meta name="generator" content={Astro.generator} />
 		<title>{title === "Home" ? "Tan Ming-Kai" : `${title} | Tan Ming-Kai`}</title>
+		{!hasInfo && (
+			<script is:inline>
+				// All page, first load: keep the images off screen until they slide in
+				// (shown anyway after 3s, in case the slide never runs)
+				if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+					document.documentElement.dataset.intro = "";
+					setTimeout(function () { delete document.documentElement.dataset.intro; }, 3000);
+				}
+			</script>
+		)}
 	</head>
 	<body>
 		<!-- The dot grid: fixed behind the image area, so it stays put while pages change -->
@@ -422,6 +432,16 @@ const hasInfo = Astro.slots.has("info");
 			openFromHash();
 			addEventListener("hashchange", openFromHash);
 
+			// All page, first load: the images rise in from below
+			if ("intro" in html.dataset) {
+				const track = main.querySelector<HTMLElement>("[data-track]")!;
+				readyMedia(track).then(() => {
+					if (!("intro" in html.dataset)) return; // already shown by the fallback
+					slide(track, "translateY(100vh)", "none", true);
+					delete html.dataset.intro;
+				});
+			}
+
 			if (!reduceMotion) {
 				document.addEventListener("click", (event) => {
 					const link = (event.target as HTMLElement).closest<HTMLAnchorElement>("a[data-nav]");
@@ -518,6 +538,9 @@ const hasInfo = Astro.slots.has("info");
 		min-height: 100vh;
 		padding: 1vw 1.1vw 3vw;
 		color: var(--navy);
+	}
+	:global(html[data-intro]) [data-track] {
+		opacity: 0;
 	}
 	.images:focus {
 		outline: none;
