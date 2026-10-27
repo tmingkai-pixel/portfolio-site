@@ -183,14 +183,18 @@ const hasInfo = Astro.slots.has("info");
 			});
 
 			let running: Animation[] = [];
+			// Outgoing pieces hold their end position and are removed as soon as their
+			// own slide ends, so they never snap back over the new page
 			const slide = (el: Element, from: string, to: string, fade = false, delay = 0) => {
+				const leavingPage = from === "none";
 				const animation = el.animate(
 					[
 						{ transform: from, ...(fade && { opacity: to === "none" ? 0 : 1 }) },
 						{ transform: to, ...(fade && { opacity: to === "none" ? 1 : 0 }) },
 					],
-					{ duration: DURATION, easing: EASE, delay, fill: "backwards" },
+					{ duration: DURATION, easing: EASE, delay, fill: leavingPage ? "both" : "backwards" },
 				);
+				if (leavingPage) animation.addEventListener("finish", () => el.remove());
 				running.push(animation);
 				return animation;
 			};
@@ -320,16 +324,15 @@ const hasInfo = Astro.slots.has("info");
 				if (!(document.activeElement instanceof HTMLElement) || !document.activeElement.isConnected || document.activeElement === document.body) main.focus({ preventScroll: true });
 
 				// Slide: old out, new in, at the same time
-				const done: Promise<unknown>[] = [];
 				const out = up ? "translateY(-100vh)" : "translateY(100vh)";
 				const into = up ? "translateY(100vh)" : "translateY(-100vh)";
-				done.push(slide(leaving, "none", out, true, IMAGES_LAG).finished);
+				slide(leaving, "none", out, true, IMAGES_LAG);
 				slide(newTrack, into, "none", true, IMAGES_LAG);
 				if (oldInfo && newInfo) {
-					done.push(slide(oldInfo, "none", up ? "translateY(-100%)" : "translateY(100%)").finished);
+					slide(oldInfo, "none", up ? "translateY(-100%)" : "translateY(100%)");
 					slide(newInfo, up ? "translateY(100%)" : "translateY(-100%)", "none");
 				} else if (oldInfo) {
-					done.push(slide(oldInfo, "none", "translateX(-100%)").finished);
+					slide(oldInfo, "none", "translateX(-100%)");
 				} else if (newInfo) {
 					slide(newInfo, "translateX(-100%)", "none");
 				}
@@ -344,10 +347,6 @@ const hasInfo = Astro.slots.has("info");
 				};
 				dotLag = lag;
 				requestAnimationFrame(settle);
-
-				await Promise.allSettled(done);
-				leaving.remove();
-				oldInfo?.remove();
 			};
 
 			if (!reduceMotion) {
