@@ -207,6 +207,17 @@ const hasInfo = Astro.slots.has("info");
 				return layer;
 			};
 
+			// Get the first few photos loaded before they slide in, so they don't pop in
+			// halfway (gives up after a second, so a slow connection never stalls a click)
+			const readyPhotos = (imgs: HTMLImageElement[]) => {
+				const first = imgs.slice(0, 6);
+				for (const img of first) img.loading = "eager";
+				return Promise.race([
+					Promise.all(first.map((img) => img.decode().catch(() => {}))),
+					new Promise((done) => setTimeout(done, 1000)),
+				]);
+			};
+
 			// After a jump back to the top, ease the dots into line instead of jumping
 			const settleDots = (lag: number, delay: number) => {
 				const start = performance.now();
@@ -255,6 +266,9 @@ const hasInfo = Astro.slots.has("info");
 					document.head.append(copy);
 				}
 				await Promise.all(loading);
+
+				const newTrack = document.importNode(nextTrack, true);
+				await readyPhotos([...newTrack.querySelectorAll("img")].filter((img) => !img.closest("[hidden]")));
 
 				for (const animation of running) animation.finish();
 				running = [];
@@ -305,7 +319,6 @@ const hasInfo = Astro.slots.has("info");
 				const nextInfo = nextApp.querySelector<HTMLElement>(":scope > .info");
 				const newInfo = nextInfo ? document.importNode(nextInfo, true) : null;
 				if (newInfo) main.before(newInfo);
-				const newTrack = document.importNode(nextTrack, true);
 				main.append(newTrack);
 
 				if (push) history.pushState(null, "", url);
@@ -335,16 +348,21 @@ const hasInfo = Astro.slots.has("info");
 			// and which blurb shows in the info card. Opens on "All"; #piece links work.
 			// When clicked, the photos slide like a page change: a piece further down the
 			// list comes up from below, one higher up comes down from above.
-			const selectPiece = (id: string, updateUrl: boolean, animate = false) => {
+			let pieceRequest = 0;
+			const selectPiece = async (id: string, updateUrl: boolean, animate = false) => {
+				const request = ++pieceRequest;
+				const tabs = [...document.querySelectorAll<HTMLElement>("[data-piece-tab]")];
+				for (const tab of tabs) tab.setAttribute("aria-selected", String(tab.dataset.pieceTab === id));
 				const panels = [...document.querySelectorAll<HTMLElement>("[data-track] [data-piece]")];
 				const panel = panels.find((p) => p.dataset.piece === id);
+				if (!panel) return;
+				if (animate) await readyPhotos([...panel.querySelectorAll("img")]);
+				if (request !== pieceRequest) return; // another piece was clicked meanwhile
 				const oldPanel = panels.find((p) => !p.hidden);
-				if (!panel) return false;
-				if (panel === oldPanel) return true;
+				if (panel === oldPanel) return;
 				for (const animation of running) animation.finish();
 				running = [];
 
-				const tabs = [...document.querySelectorAll<HTMLElement>("[data-piece-tab]")];
 				const order = (pieceId?: string) => tabs.findIndex((t) => t.dataset.pieceTab === pieceId);
 				const up = order(id) > order(oldPanel?.dataset.piece);
 				let leaving: HTMLElement | null = null;
@@ -355,7 +373,6 @@ const hasInfo = Astro.slots.has("info");
 					leaving = pinImages(copy, oldPanel.getBoundingClientRect());
 				}
 
-				for (const tab of tabs) tab.setAttribute("aria-selected", String(tab.dataset.pieceTab === id));
 				for (const p of panels) p.hidden = p !== panel;
 				for (const blurb of document.querySelectorAll<HTMLElement>("[data-piece-info]")) blurb.hidden = blurb.dataset.pieceInfo !== id;
 				for (const video of document.querySelectorAll<HTMLVideoElement>("[data-piece][hidden] video")) video.pause();
@@ -370,7 +387,6 @@ const hasInfo = Astro.slots.has("info");
 				} else if (panel.getBoundingClientRect().top < 0) {
 					scrollTo({ top: 0 });
 				}
-				return true;
 			};
 			document.addEventListener("click", (event) => {
 				const tab = (event.target as HTMLElement).closest<HTMLElement>("[data-piece-tab]");
@@ -378,8 +394,10 @@ const hasInfo = Astro.slots.has("info");
 			});
 			const openFromHash = () => {
 				const id = decodeURIComponent(location.hash.slice(1));
-				if (id && selectPiece(id, false)) {
-					document.querySelector(`[data-piece-tab="${CSS.escape(id)}"]`)?.scrollIntoView({ block: "nearest" });
+				const tab = id && document.querySelector(`[data-piece-tab="${CSS.escape(id)}"]`);
+				if (tab) {
+					selectPiece(id, false);
+					tab.scrollIntoView({ block: "nearest" });
 				}
 			};
 			openFromHash();
