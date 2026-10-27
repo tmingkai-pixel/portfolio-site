@@ -4,7 +4,7 @@ import AppShell from "../../layouts/AppShell.astro";
 import Media from "../../components/Media.astro";
 import StoryGroup from "../../components/StoryGroup.astro";
 import StaggerGrid from "../../components/StaggerGrid.astro";
-import { getAllWorks, workMedia, pieceIds } from "../../lib/works";
+import { getAllWorks, getWorks, workMedia, pieceIds } from "../../lib/works";
 
 // Every project (drafts included) gets a page; drafts are a private preview link
 export async function getStaticPaths() {
@@ -13,6 +13,10 @@ export async function getStaticPaths() {
 }
 
 const { work } = Astro.props;
+// Position in the Selected Works list (drafts aren't listed: treat as the bottom)
+const listed = await getWorks();
+const listedIndex = listed.findIndex((w) => w.id === work.id);
+const menuIndex = listedIndex >= 0 ? listedIndex : listed.length;
 const { Content } = await render(work);
 const { data } = work;
 
@@ -59,7 +63,7 @@ const details: [string, string | null | undefined][] = [
 ];
 ---
 
-<AppShell title={data.title} description={data.summary} active={work.id} noindex={data.draft}>
+<AppShell title={data.title} description={data.summary} active={work.id} noindex={data.draft} menuIndex={menuIndex}>
 	{data.draft && (
 		<p slot="before" class="draft-banner">
 			Draft preview: only people with this link can see it. Untick “Draft” to publish.

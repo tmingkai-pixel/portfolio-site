@@ -17,7 +17,7 @@ const experience = (about.experience ?? []).map((job) => ({
 const skills = [...(about.techSkills ?? []), ...(about.softSkills ?? [])].filter(Boolean);
 ---
 
-<AppShell title="About" active="about" description={about.tagline}>
+<AppShell title="About" active="about" description={about.tagline} menuIndex={-1}>
 	<Fragment slot="info">
 		<section class="card">
 			<h1 class="card-label">About</h1>

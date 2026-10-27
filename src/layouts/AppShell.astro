@@ -15,6 +15,9 @@ interface Props {
 	active: string;
 	/** Keep this page out of search engines (used for draft previews) */
 	noindex?: boolean;
+	/** Position in the menu (About = -1, projects 0, 1, 2…) so column 2 can
+	    slide in from above or below when moving between pages */
+	menuIndex?: number;
 }
 
 const {
@@ -22,6 +25,7 @@ const {
 	description = "Tan Ming-Kai — multi-disciplinary designer. Graphic design, 3D printing, and structural cardboard craft.",
 	active,
 	noindex = false,
+	menuIndex,
 } = Astro.props;
 const hasInfo = Astro.slots.has("info");
 ---
@@ -42,7 +46,7 @@ const hasInfo = Astro.slots.has("info");
 	</head>
 	<body>
 		<slot name="before" />
-		<div class:list={["app", hasInfo ? "app--info" : "app--wide"]} data-has-info={hasInfo ? "1" : "0"}>
+		<div class:list={["app", hasInfo ? "app--info" : "app--wide"]} data-has-info={hasInfo ? "1" : "0"} data-menu-index={menuIndex ?? ""}>
 			<Sidebar active={active} />
 			{hasInfo && (
 				<aside class="info" data-info>
@@ -60,20 +64,49 @@ const hasInfo = Astro.slots.has("info");
 
 			const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-			// Column 2 slides in from under column 1 when arriving from a page without it
-			// (e.g. landing → project). Moving between projects doesn't replay it.
+			// Column 2's entrance:
+			//  - arriving from a page without it (All → project): slides in from under column 1
+			//  - moving between pages that have it: slides in from above if the new page is
+			//    higher in the menu than the last one, from below if it's lower
 			const app = document.querySelector<HTMLElement>(".app")!;
 			const info = document.querySelector<HTMLElement>("[data-info]");
-			let cameFromWide = false;
+			let lastHadInfo: string | null = null;
+			let lastIndex: string | null = null;
 			try {
-				cameFromWide = sessionStorage.getItem("lastHadInfo") === "0";
+				lastHadInfo = sessionStorage.getItem("lastHadInfo");
+				lastIndex = sessionStorage.getItem("lastMenuIndex");
 			} catch {}
-			if (info && cameFromWide && !reduceMotion) info.classList.add("info--enter");
+			if (info && !reduceMotion) {
+				const here = app.dataset.menuIndex;
+				if (lastHadInfo === "0") {
+					info.classList.add("info--enter");
+				} else if (lastHadInfo === "1" && here !== "" && lastIndex && lastIndex !== "" && lastIndex !== here) {
+					info.classList.add(Number(here) < Number(lastIndex) ? "info--from-above" : "info--from-below");
+				}
+			}
 			addEventListener("pagehide", () => {
 				try {
 					sessionStorage.setItem("lastHadInfo", app.dataset.hasInfo ?? "0");
+					sessionStorage.setItem("lastMenuIndex", app.dataset.menuIndex ?? "");
 				} catch {}
 			});
+
+			// Parallax: the dot grid behind the images scrolls at half speed
+			const images = document.querySelector<HTMLElement>(".images");
+			if (images && !reduceMotion) {
+				let ticking = false;
+				const update = () => {
+					images.style.setProperty("--dot-shift", `${(scrollY * 0.5).toFixed(1)}px`);
+					ticking = false;
+				};
+				addEventListener("scroll", () => {
+					if (!ticking) {
+						ticking = true;
+						requestAnimationFrame(update);
+					}
+				}, { passive: true });
+				update();
+			}
 
 			// Ambient videos only load and play while on screen
 			const observer = new IntersectionObserver((entries) => {
@@ -190,6 +223,28 @@ const hasInfo = Astro.slots.has("info");
 			transform: none;
 		}
 	}
+	.info--from-above {
+		animation: info-slide-down 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+	}
+	.info--from-below {
+		animation: info-slide-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+	}
+	@keyframes info-slide-down {
+		from {
+			transform: translateY(-100%);
+		}
+		to {
+			transform: none;
+		}
+	}
+	@keyframes info-slide-up {
+		from {
+			transform: translateY(100%);
+		}
+		to {
+			transform: none;
+		}
+	}
 
 	/* Image area: dot grid behind, scrolls with the page */
 	.images {
@@ -205,7 +260,10 @@ const hasInfo = Astro.slots.has("info");
 		--step: 1.1vw;
 		background-image: var(--dot), var(--dot);
 		background-size: var(--step) var(--step);
-		background-position: 0 0, calc(var(--step) / 2) calc(var(--step) / 2);
+		/* --dot-shift is set while scrolling (parallax: the dots move at half speed) */
+		background-position:
+			0 var(--dot-shift, 0px),
+			calc(var(--step) / 2) calc(var(--step) / 2 + var(--dot-shift, 0px));
 	}
 
 	/* Full-screen viewer (PhotoSwipe) caption and controls, in the site's colours */
