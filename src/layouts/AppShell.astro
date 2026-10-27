@@ -207,15 +207,26 @@ const hasInfo = Astro.slots.has("info");
 				return layer;
 			};
 
-			// Get the first few photos loaded before they slide in, so they don't pop in
-			// halfway (gives up after a second, so a slow connection never stalls a click)
-			const readyPhotos = (imgs: HTMLImageElement[]) => {
-				const first = imgs.slice(0, 6);
-				for (const img of first) img.loading = "eager";
-				return Promise.race([
-					Promise.all(first.map((img) => img.decode().catch(() => {}))),
-					new Promise((done) => setTimeout(done, 1000)),
-				]);
+			// Get the first few photos and videos loaded before they slide in, so they
+			// don't pop in halfway (gives up after a second, so a slow connection never
+			// stalls a click)
+			const readyMedia = (root: HTMLElement) => {
+				const first = [...root.querySelectorAll<HTMLImageElement | HTMLVideoElement>("img, video")]
+					.filter((el) => [root, null].includes(el.closest<HTMLElement>("[hidden]"))) // skip hidden pieces
+					.slice(0, 6);
+				const ready = first.map((el) => {
+					if (el instanceof HTMLImageElement) {
+						el.loading = "eager";
+						return el.decode().catch(() => {});
+					}
+					if (el.readyState >= 2) return;
+					el.preload = "auto";
+					return new Promise((done) => {
+						el.addEventListener("loadeddata", done, { once: true });
+						el.addEventListener("error", done, { once: true });
+					});
+				});
+				return Promise.race([Promise.all(ready), new Promise((done) => setTimeout(done, 1000))]);
 			};
 
 			// After a jump back to the top, ease the dots into line instead of jumping
@@ -268,7 +279,7 @@ const hasInfo = Astro.slots.has("info");
 				await Promise.all(loading);
 
 				const newTrack = document.importNode(nextTrack, true);
-				await readyPhotos([...newTrack.querySelectorAll("img")].filter((img) => !img.closest("[hidden]")));
+				await readyMedia(newTrack);
 
 				for (const animation of running) animation.finish();
 				running = [];
@@ -356,7 +367,7 @@ const hasInfo = Astro.slots.has("info");
 				const panels = [...document.querySelectorAll<HTMLElement>("[data-track] [data-piece]")];
 				const panel = panels.find((p) => p.dataset.piece === id);
 				if (!panel) return;
-				if (animate) await readyPhotos([...panel.querySelectorAll("img")]);
+				if (animate) await readyMedia(panel);
 				if (request !== pieceRequest) return; // another piece was clicked meanwhile
 				const oldPanel = panels.find((p) => !p.hidden);
 				if (panel === oldPanel) return;
@@ -368,9 +379,17 @@ const hasInfo = Astro.slots.has("info");
 				let leaving: HTMLElement | null = null;
 				const lag = scrollY * 0.5 + dotLag;
 				if (animate && oldPanel) {
-					const copy = oldPanel.cloneNode(true) as HTMLElement;
-					copy.removeAttribute("id");
-					leaving = pinImages(copy, oldPanel.getBoundingClientRect());
+					// Slide the real photos out (a copy would have to reload, so it would
+					// flash), leaving a hidden copy in the list for next time
+					const rect = oldPanel.getBoundingClientRect();
+					const stayBehind = oldPanel.cloneNode(true) as HTMLElement;
+					stayBehind.hidden = true;
+					oldPanel.replaceWith(stayBehind);
+					watchVideos(stayBehind);
+					panels[panels.indexOf(oldPanel)] = stayBehind;
+					oldPanel.removeAttribute("id");
+					oldPanel.removeAttribute("data-piece");
+					leaving = pinImages(oldPanel, rect);
 				}
 
 				for (const p of panels) p.hidden = p !== panel;
