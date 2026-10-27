@@ -99,7 +99,7 @@ const details: [string, string | null | undefined][] = [
 				{isTabs && pieces.map((piece, i) => (
 					<section class="card-row card-row--piece" data-piece-info={piece.id} hidden={i !== 0}>
 						<h2 class="piece-name">{piece.title}</h2>
-						{piece.caption && <p class="card-text">{piece.caption}</p>}
+						<p class="card-text">{piece.caption}</p>
 					</section>
 				))}
 			</div>
@@ -227,6 +227,19 @@ const details: [string, string | null | undefined][] = [
 		color: var(--orange);
 		font-size: 0.72vw;
 		font-weight: 400;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	/* The piece description is always four lines tall, so the Pieces list below
+	   stays put when switching pieces; longer text scrolls inside it */
+	.card-row--piece .card-text {
+		height: calc(4 * 1.25em);
+		overflow-y: auto;
+		scrollbar-width: none;
+	}
+	.card-row--piece .card-text::-webkit-scrollbar {
+		display: none;
 	}
 
 	/* Bottom section of column 2: fills the remaining height and scrolls */
@@ -339,6 +352,9 @@ const details: [string, string | null | undefined][] = [
 		}
 		.piece-name {
 			font-size: 12px;
+		}
+		.card-row--piece .card-text {
+			height: auto;
 		}
 		.info-head {
 			margin-bottom: 16px;
