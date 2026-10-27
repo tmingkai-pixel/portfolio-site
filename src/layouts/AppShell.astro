@@ -450,21 +450,17 @@ const hasInfo = Astro.slots.has("info");
 		outline: none;
 	}
 
-	/* Offset dot grid, fixed behind the image area: two layers, the second shifted
-	   half a step across and down, so every other row of dots sits in the gaps of
-	   the row above. --dot-shift is set while scrolling (parallax: half speed) */
+	/* Dot grid, fixed behind the image area (same dot density as the old offset
+	   grid). --dot-shift is set while scrolling (parallax: half speed) */
 	.dots {
 		position: fixed;
 		inset: 0 0 0 20.5vw;
 		pointer-events: none;
-		--dot: radial-gradient(circle, var(--navy) 0.06vw, transparent 0.075vw);
-		--step: 1.1vw;
-		background-image: var(--dot), var(--dot);
-		background-size: var(--step) var(--step);
-		background-position:
-			0 var(--dot-shift, 0px),
-			calc(var(--step) / 2) calc(var(--step) / 2 + var(--dot-shift, 0px));
+		background-image: radial-gradient(circle, var(--navy) 0.06vw, transparent 0.075vw);
+		background-size: 0.78vw 0.78vw;
+		background-position: 0 var(--dot-shift, 0px);
 	}
+
 
 	/* Full-screen viewer (PhotoSwipe) caption and controls, in the site's colours */
 	:global(.pswp__caption) {
@@ -515,8 +511,8 @@ const hasInfo = Astro.slots.has("info");
 		}
 		.dots {
 			inset: 0;
-			--dot: radial-gradient(circle, var(--navy) 0.8px, transparent 1px);
-			--step: 14px;
+			background-image: radial-gradient(circle, var(--navy) 0.8px, transparent 1px);
+			background-size: 10px 10px;
 		}
 	}
 </style>
