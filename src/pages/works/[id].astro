@@ -151,6 +151,7 @@ const details: [string, string | null | undefined][] = [
 
 <style>
 	.draft-banner {
+		position: relative; /* above the dot grid */
 		margin: 0;
 		background: var(--navy);
 		color: #fff;
@@ -364,34 +365,3 @@ const details: [string, string | null | undefined][] = [
 	}
 </style>
 
-<script>
-	// Tabs projects: the Pieces list (column 2) switches which piece's photos show,
-	// and which blurb shows in the info card. Opens on the first piece; #piece links work.
-	const tabs = [...document.querySelectorAll<HTMLButtonElement>("[data-piece-tab]")];
-	const panels = [...document.querySelectorAll<HTMLElement>("[data-piece]")];
-	const blurbs = [...document.querySelectorAll<HTMLElement>("[data-piece-info]")];
-	if (tabs.length && panels.length) {
-		const select = (id: string, updateUrl: boolean) => {
-			for (const tab of tabs) tab.setAttribute("aria-selected", String(tab.dataset.pieceTab === id));
-			for (const panel of panels) panel.hidden = panel.dataset.piece !== id;
-			for (const blurb of blurbs) blurb.hidden = blurb.dataset.pieceInfo !== id;
-			for (const video of document.querySelectorAll<HTMLVideoElement>("[data-piece][hidden] video")) video.pause();
-			if (updateUrl) history.replaceState(null, "", `#${id}`);
-			// Show the new piece's photos from the top
-			const panel = panels.find((p) => p.dataset.piece === id);
-			if (panel && panel.getBoundingClientRect().top < 0) scrollTo({ top: 0 });
-		};
-		for (const tab of tabs) {
-			tab.addEventListener("click", () => select(tab.dataset.pieceTab!, true));
-		}
-		const openFromHash = () => {
-			const id = decodeURIComponent(location.hash.slice(1));
-			if (id && panels.some((p) => p.dataset.piece === id)) {
-				select(id, false);
-				tabs.find((t) => t.dataset.pieceTab === id)?.scrollIntoView({ block: "nearest" });
-			}
-		};
-		openFromHash();
-		addEventListener("hashchange", openFromHash);
-	}
-</script>

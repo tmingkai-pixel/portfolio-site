@@ -43,37 +43,10 @@ const hasInfo = Astro.slots.has("info");
 		{noindex && <meta name="robots" content="noindex, nofollow" />}
 		<meta name="generator" content={Astro.generator} />
 		<title>{title === "Home" ? "Tan Ming-Kai" : `${title} | Tan Ming-Kai`}</title>
-		<script is:inline>
-			// Decide how this page enters, before anything is drawn (so nothing jumps):
-			//   All → project/About: column 2 slides in from the left, images rise from below
-			//   page → page with column 2: both come from above if this page is higher in the
-			//   menu than the last one, from below if it's lower
-			//   project/About → All: the collage comes in from above
-			(function () {
-				var html = document.documentElement;
-				if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-				var lastHadInfo, lastIndex;
-				try {
-					lastHadInfo = sessionStorage.getItem("lastHadInfo");
-					lastIndex = sessionStorage.getItem("lastMenuIndex");
-				} catch (e) {}
-				var hasInfo = html.dataset.hasInfo === "1";
-				var here = html.dataset.menuIndex;
-				var dir = "";
-				if (hasInfo && lastHadInfo === "0") {
-					html.dataset.infoEnter = "left";
-					dir = "below";
-				} else if (hasInfo && lastHadInfo === "1" && here !== "" && lastIndex && lastIndex !== here) {
-					dir = Number(here) < Number(lastIndex) ? "above" : "below";
-					html.dataset.infoEnter = dir;
-				} else if (!hasInfo && lastHadInfo === "1") {
-					dir = "above";
-				}
-				if (dir) html.dataset.imagesEnter = dir;
-			})();
-		</script>
 	</head>
 	<body>
+		<!-- The dot grid: fixed behind the image area, so it stays put while pages change -->
+		<div class="dots" aria-hidden="true"></div>
 		<slot name="before" />
 		<div class:list={["app", hasInfo ? "app--info" : "app--wide"]} data-has-info={hasInfo ? "1" : "0"} data-menu-index={menuIndex ?? ""}>
 			<Sidebar active={active} />
@@ -82,8 +55,10 @@ const hasInfo = Astro.slots.has("info");
 					<slot name="info" />
 				</aside>
 			)}
-			<main class="images" data-lightbox>
-				<slot />
+			<main class="images" data-lightbox tabindex="-1">
+				<div data-track>
+					<slot />
+				</div>
 			</main>
 		</div>
 
@@ -93,57 +68,27 @@ const hasInfo = Astro.slots.has("info");
 
 			const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-			// Remember where we are, for the next page's entrance (see the head script)
 			const html = document.documentElement;
-			const remember = () => {
-				try {
-					sessionStorage.setItem("lastHadInfo", html.dataset.hasInfo ?? "0");
-					sessionStorage.setItem("lastMenuIndex", html.dataset.menuIndex ?? "");
-				} catch {}
-			};
-			addEventListener("pagehide", remember);
+			const app = document.querySelector<HTMLElement>(".app")!;
+			const main = document.querySelector<HTMLElement>(".images")!;
+			const dots = document.querySelector<HTMLElement>(".dots")!;
 
-			// Leaving: move the images off screen first, then go. Direction matches the
-			// next page's entrance (up and out when the next one comes from below).
-			const imagesArea = document.querySelector<HTMLElement>(".images");
-			const hereHasInfo = html.dataset.hasInfo === "1";
-			const hereIndex = html.dataset.menuIndex ?? "";
-			document.addEventListener("click", (event) => {
-				const link = (event.target as HTMLElement).closest<HTMLAnchorElement>("a[data-nav]");
-				if (!link || !imagesArea || reduceMotion) return;
-				if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-				if (link.target && link.target !== "_self") return;
-				const target = link.dataset.nav!;
-				let exit = "";
-				if (target === "all") exit = hereHasInfo ? "down" : "";
-				else if (!hereHasInfo) exit = "up";
-				else if (target !== hereIndex) exit = Number(target) < Number(hereIndex) ? "down" : "up";
-				if (!exit) return;
-				event.preventDefault();
-				remember();
-				imagesArea.classList.add(`images--exit-${exit}`);
-				setTimeout(() => location.assign(link.href), 420);
-			});
-			// Coming back with the browser's back button: undo the exit
-			addEventListener("pageshow", (event) => {
-				if (event.persisted) imagesArea?.classList.remove("images--exit-up", "images--exit-down");
-			});
-
-			// Parallax: the dot grid behind the images scrolls at half speed
-			const images = document.querySelector<HTMLElement>(".images");
-			if (images && !reduceMotion) {
+			// Parallax: the dot grid moves at half the scroll speed. `dotLag` eases it
+			// back into line after a page change scrolls to the top.
+			let dotLag = 0;
+			const placeDots = () => dots.style.setProperty("--dot-shift", `${(-(scrollY * 0.5) - dotLag).toFixed(1)}px`);
+			if (!reduceMotion) {
 				let ticking = false;
-				const update = () => {
-					images.style.setProperty("--dot-shift", `${(scrollY * 0.5).toFixed(1)}px`);
-					ticking = false;
-				};
 				addEventListener("scroll", () => {
 					if (!ticking) {
 						ticking = true;
-						requestAnimationFrame(update);
+						requestAnimationFrame(() => {
+							placeDots();
+							ticking = false;
+						});
 					}
 				}, { passive: true });
-				update();
+				placeDots();
 			}
 
 			// Ambient videos only load and play while on screen
@@ -154,25 +99,249 @@ const hasInfo = Astro.slots.has("info");
 					else video.pause();
 				}
 			}, { rootMargin: "200px" });
-			for (const video of document.querySelectorAll("video[data-ambient]")) observer.observe(video);
+			const watchVideos = (root: ParentNode) => {
+				for (const video of root.querySelectorAll("video[data-ambient]")) observer.observe(video);
+			};
+			watchVideos(document);
 
 			// "Sound on" buttons: unmute one video at a time
-			const toggles = [...document.querySelectorAll<HTMLButtonElement>("[data-sound-toggle]")];
-			for (const button of toggles) {
-				button.addEventListener("click", () => {
-					const turnOn = button.getAttribute("aria-pressed") !== "true";
-					for (const other of toggles) {
-						other.setAttribute("aria-pressed", "false");
-						other.textContent = "Sound on";
-						(other.previousElementSibling as HTMLVideoElement).muted = true;
-					}
-					if (turnOn) {
-						const video = button.previousElementSibling as HTMLVideoElement;
-						video.muted = false;
-						video.play().catch(() => {});
-						button.setAttribute("aria-pressed", "true");
-						button.textContent = "Sound off";
-					}
+			document.addEventListener("click", (event) => {
+				const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-sound-toggle]");
+				if (!button) return;
+				const turnOn = button.getAttribute("aria-pressed") !== "true";
+				for (const other of document.querySelectorAll<HTMLButtonElement>("[data-sound-toggle]")) {
+					other.setAttribute("aria-pressed", "false");
+					other.textContent = "Sound on";
+					(other.previousElementSibling as HTMLVideoElement).muted = true;
+				}
+				if (turnOn) {
+					const video = button.previousElementSibling as HTMLVideoElement;
+					video.muted = false;
+					video.play().catch(() => {});
+					button.setAttribute("aria-pressed", "true");
+					button.textContent = "Sound off";
+				}
+			});
+
+			// Tabs projects: the Pieces list (column 2) switches which piece's photos show,
+			// and which blurb shows in the info card. Opens on the first piece; #piece links work.
+			const selectPiece = (id: string, updateUrl: boolean) => {
+				const panels = [...document.querySelectorAll<HTMLElement>("[data-track] [data-piece]")];
+				if (!panels.some((p) => p.dataset.piece === id)) return false;
+				for (const tab of document.querySelectorAll<HTMLElement>("[data-piece-tab]")) tab.setAttribute("aria-selected", String(tab.dataset.pieceTab === id));
+				for (const panel of panels) panel.hidden = panel.dataset.piece !== id;
+				for (const blurb of document.querySelectorAll<HTMLElement>("[data-piece-info]")) blurb.hidden = blurb.dataset.pieceInfo !== id;
+				for (const video of document.querySelectorAll<HTMLVideoElement>("[data-piece][hidden] video")) video.pause();
+				if (updateUrl) history.replaceState(history.state, "", `#${id}`);
+				// Show the new piece's photos from the top
+				const panel = panels.find((p) => p.dataset.piece === id);
+				if (panel && panel.getBoundingClientRect().top < 0) scrollTo({ top: 0 });
+				return true;
+			};
+			document.addEventListener("click", (event) => {
+				const tab = (event.target as HTMLElement).closest<HTMLElement>("[data-piece-tab]");
+				if (tab) selectPiece(tab.dataset.pieceTab!, true);
+			});
+			const openFromHash = () => {
+				const id = decodeURIComponent(location.hash.slice(1));
+				if (id && selectPiece(id, false)) {
+					document.querySelector(`[data-piece-tab="${CSS.escape(id)}"]`)?.scrollIntoView({ block: "nearest" });
+				}
+			};
+			openFromHash();
+			addEventListener("hashchange", openFromHash);
+
+			// ---------- Moving between pages ----------
+			// Menu and collage links load the next page in place, so the old columns can
+			// slide out while the new ones slide in. Direction follows the menu:
+			//   All → project/About: column 2 slides in from the left, images move up
+			//   page → page: a page higher in the menu comes from above, a lower one from below
+			//   project/About → All: column 2 slides back left, images move down
+			const DURATION = 900;
+			const EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
+
+			const pages = new Map<string, Promise<Document>>();
+			const fetchPage = (url: string) => {
+				const key = url.split("#")[0];
+				if (!pages.has(key)) {
+					const page = fetch(key)
+						.then((response) => {
+							if (!response.ok) throw new Error(String(response.status));
+							return response.text();
+						})
+						.then((text) => new DOMParser().parseFromString(text, "text/html"));
+					page.catch(() => pages.delete(key));
+					pages.set(key, page);
+				}
+				return pages.get(key)!;
+			};
+			// Start loading on hover, so the click feels instant
+			document.addEventListener("pointerover", (event) => {
+				const link = (event.target as HTMLElement).closest<HTMLAnchorElement>("a[data-nav]");
+				if (link) fetchPage(link.href).catch(() => {});
+			});
+
+			let running: Animation[] = [];
+			const slide = (el: Element, from: string, to: string, fade = false) => {
+				const animation = el.animate(
+					[
+						{ transform: from, ...(fade && { opacity: to === "none" ? 0 : 1 }) },
+						{ transform: to, ...(fade && { opacity: to === "none" ? 1 : 0 }) },
+					],
+					{ duration: DURATION, easing: EASE },
+				);
+				running.push(animation);
+				return animation;
+			};
+
+			// Pin an element where it is on screen, so it can slide away after the page changes
+			const pinInPlace = (el: HTMLElement) => {
+				const rect = el.getBoundingClientRect();
+				Object.assign(el.style, {
+					position: "fixed",
+					top: `${rect.top}px`,
+					left: `${rect.left}px`,
+					width: `${rect.width}px`,
+					height: `${rect.height}px`,
+					margin: "0",
+					pointerEvents: "none",
+				});
+				app.append(el);
+			};
+
+			let currentPath = location.pathname;
+			history.scrollRestoration = "manual";
+
+			const go = async (url: string, push: boolean) => {
+				let doc: Document;
+				try {
+					doc = await fetchPage(url);
+				} catch {
+					location.assign(url);
+					return;
+				}
+				const nextApp = doc.querySelector<HTMLElement>(".app");
+				const nextTrack = doc.querySelector<HTMLElement>("[data-track]");
+				if (!nextApp || !nextTrack) {
+					location.assign(url);
+					return;
+				}
+				for (const animation of running) animation.finish();
+				running = [];
+
+				// Which way things move
+				const fromInfo = html.dataset.hasInfo === "1";
+				const toInfo = doc.documentElement.dataset.hasInfo === "1";
+				const fromIndex = Number(html.dataset.menuIndex);
+				const toIndex = Number(doc.documentElement.dataset.menuIndex);
+				const up = toInfo ? !fromInfo || toIndex > fromIndex : false; // new content arrives from below
+
+				// Where the dots are now (read before the page shortens and the scroll resets)
+				const lag = scrollY * 0.5 + dotLag;
+
+				// Old images: clip to what's on screen, pin there
+				const oldTrack = main.querySelector<HTMLElement>("[data-track]")!;
+				const trackRect = oldTrack.getBoundingClientRect();
+				const leaving = document.createElement("div");
+				leaving.className = "images-leaving";
+				leaving.setAttribute("aria-hidden", "true");
+				Object.assign(leaving.style, {
+					position: "fixed",
+					top: "0",
+					left: `${trackRect.left}px`,
+					width: `${trackRect.width}px`,
+					height: "100vh",
+					overflow: "hidden",
+					pointerEvents: "none",
+				});
+				oldTrack.style.transform = `translateY(${trackRect.top}px)`;
+				oldTrack.removeAttribute("data-track");
+				leaving.append(oldTrack);
+				app.append(leaving);
+
+				// Old column 2: pin it too
+				const oldInfo = app.querySelector<HTMLElement>(":scope > .info");
+				if (oldInfo) pinInPlace(oldInfo);
+
+				// Swap in the new page
+				scrollTo(0, 0);
+				for (const el of [...document.body.children]) if (el !== dots && el.compareDocumentPosition(app) & Node.DOCUMENT_POSITION_FOLLOWING) el.remove();
+				for (const el of [...doc.body.children]) {
+					if (el === nextApp) break;
+					if (!el.matches(".dots, script")) app.before(document.adoptNode(el));
+				}
+				app.className = nextApp.className;
+				html.dataset.hasInfo = doc.documentElement.dataset.hasInfo;
+				html.dataset.menuIndex = doc.documentElement.dataset.menuIndex;
+				document.title = doc.title;
+				const description = doc.querySelector<HTMLMetaElement>('meta[name="description"]')?.content;
+				if (description) document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", description);
+
+				// Menu: move the highlight (and fold the phone menu away)
+				const nextLinks = [...nextApp.querySelectorAll(".sidebar a")];
+				document.querySelectorAll(".sidebar a").forEach((link, i) => {
+					const current = nextLinks[i]?.getAttribute("aria-current");
+					if (current) link.setAttribute("aria-current", current);
+					else link.removeAttribute("aria-current");
+				});
+				const sidebar = document.querySelector<HTMLElement>("[data-sidebar]");
+				if (sidebar?.classList.contains("open")) sidebar.querySelector<HTMLButtonElement>("[data-sidebar-toggle]")?.click();
+
+				const nextInfo = nextApp.querySelector<HTMLElement>(":scope > .info");
+				const newInfo = nextInfo ? document.adoptNode(nextInfo) : null;
+				if (newInfo) main.before(newInfo);
+				const newTrack = document.adoptNode(nextTrack);
+				main.append(newTrack);
+
+				if (push) history.pushState(null, "", url);
+				currentPath = location.pathname;
+				if (location.hash) openFromHash();
+				watchVideos(newTrack);
+				if (!(document.activeElement instanceof HTMLElement) || !document.activeElement.isConnected || document.activeElement === document.body) main.focus({ preventScroll: true });
+
+				// Slide: old out, new in, at the same time
+				const done: Promise<unknown>[] = [];
+				const out = up ? "translateY(-100vh)" : "translateY(100vh)";
+				const into = up ? "translateY(100vh)" : "translateY(-100vh)";
+				done.push(slide(leaving, "none", out, true).finished);
+				slide(newTrack, into, "none", true);
+				if (oldInfo && newInfo) {
+					done.push(slide(oldInfo, "none", up ? "translateY(-100%)" : "translateY(100%)").finished);
+					slide(newInfo, up ? "translateY(100%)" : "translateY(-100%)", "none");
+				} else if (oldInfo) {
+					done.push(slide(oldInfo, "none", "translateX(-100%)").finished);
+				} else if (newInfo) {
+					slide(newInfo, "translateX(-100%)", "none");
+				}
+
+				// Bring the dots back into line with the top of the page
+				const start = performance.now();
+				const settle = (now: number) => {
+					const t = Math.min(1, (now - start) / DURATION);
+					dotLag = (lag - scrollY * 0.5) * (1 - (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2));
+					placeDots();
+					if (t < 1) requestAnimationFrame(settle);
+				};
+				dotLag = lag;
+				requestAnimationFrame(settle);
+
+				await Promise.allSettled(done);
+				leaving.remove();
+				oldInfo?.remove();
+			};
+
+			if (!reduceMotion) {
+				document.addEventListener("click", (event) => {
+					const link = (event.target as HTMLElement).closest<HTMLAnchorElement>("a[data-nav]");
+					if (!link) return;
+					if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+					if ((link.target && link.target !== "_self") || link.origin !== location.origin) return;
+					if (link.pathname === location.pathname) return; // same page: let a #piece link work as normal
+					event.preventDefault();
+					go(link.href, true);
+				});
+				addEventListener("popstate", () => {
+					if (location.pathname !== currentPath) go(location.href, false);
 				});
 			}
 
@@ -250,95 +419,29 @@ const hasInfo = Astro.slots.has("info");
 		font-family: var(--font-mono);
 		color: var(--navy);
 	}
-	/* Column 2 entrance (set by the head script) */
-	:global(html[data-info-enter="left"]) .info {
-		animation: info-slide-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-	}
-	@keyframes info-slide-in {
-		from {
-			transform: translateX(-100%);
-		}
-		to {
-			transform: none;
-		}
-	}
-	:global(html[data-info-enter="above"]) .info {
-		animation: info-slide-down 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-	}
-	:global(html[data-info-enter="below"]) .info {
-		animation: info-slide-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-	}
-
-	/* Images: leave first (on click), then the new page's images arrive after a tiny pause */
-	.images {
-		transition: transform 0.4s cubic-bezier(0.5, 0, 0.9, 0.4), opacity 0.4s ease-in;
-	}
-	.images--exit-up {
-		transform: translateY(-55vh);
-		opacity: 0;
-	}
-	.images--exit-down {
-		transform: translateY(55vh);
-		opacity: 0;
-	}
-	:global(html[data-images-enter="below"]) .images {
-		animation: images-in-below 0.6s cubic-bezier(0.1, 0.6, 0.2, 1) 0.12s both;
-	}
-	:global(html[data-images-enter="above"]) .images {
-		animation: images-in-above 0.6s cubic-bezier(0.1, 0.6, 0.2, 1) 0.12s both;
-	}
-	@keyframes images-in-below {
-		from {
-			transform: translateY(55vh);
-			opacity: 0;
-		}
-		to {
-			transform: none;
-			opacity: 1;
-		}
-	}
-	@keyframes images-in-above {
-		from {
-			transform: translateY(-55vh);
-			opacity: 0;
-		}
-		to {
-			transform: none;
-			opacity: 1;
-		}
-	}
-	@keyframes info-slide-down {
-		from {
-			transform: translateY(-100%);
-		}
-		to {
-			transform: none;
-		}
-	}
-	@keyframes info-slide-up {
-		from {
-			transform: translateY(100%);
-		}
-		to {
-			transform: none;
-		}
-	}
-
-	/* Image area: dot grid behind, scrolls with the page */
+	/* Image area: transparent so the fixed dot grid shows through */
 	.images {
 		position: relative;
 		min-width: 0;
 		min-height: 100vh;
 		padding: 1vw 1.1vw 3vw;
 		color: var(--navy);
-		background-color: var(--bg);
-		/* Offset dot grid: two layers, the second shifted half a step across and
-		   down, so every other row of dots sits in the gaps of the row above */
+	}
+	.images:focus {
+		outline: none;
+	}
+
+	/* Offset dot grid, fixed behind the image area: two layers, the second shifted
+	   half a step across and down, so every other row of dots sits in the gaps of
+	   the row above. --dot-shift is set while scrolling (parallax: half speed) */
+	.dots {
+		position: fixed;
+		inset: 0 0 0 20.5vw;
+		pointer-events: none;
 		--dot: radial-gradient(circle, var(--navy) 0.06vw, transparent 0.075vw);
 		--step: 1.1vw;
 		background-image: var(--dot), var(--dot);
 		background-size: var(--step) var(--step);
-		/* --dot-shift is set while scrolling (parallax: the dots move at half speed) */
 		background-position:
 			0 var(--dot-shift, 0px),
 			calc(var(--step) / 2) calc(var(--step) / 2 + var(--dot-shift, 0px));
@@ -383,13 +486,16 @@ const hasInfo = Astro.slots.has("info");
 			display: block;
 		}
 		.info {
-			position: static;
+			position: relative; /* stays above the dot grid */
 			height: auto;
 			padding: 16px;
 		}
 		.images {
 			min-height: 0;
 			padding: 12px 16px 40px;
+		}
+		.dots {
+			inset: 0;
 			--dot: radial-gradient(circle, var(--navy) 0.8px, transparent 1px);
 			--step: 14px;
 		}
