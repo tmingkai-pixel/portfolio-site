@@ -19,7 +19,7 @@ const works = await getWorks();
 
 <nav class="sidebar" aria-label="Main" data-sidebar>
 	<div class="sidebar-bar">
-		<a class="sidebar-name" href={base}>{about.name}</a>
+		<a class="sidebar-name" href={base} data-nav="all">{about.name}</a>
 		<button type="button" class="sidebar-toggle" aria-expanded="false" aria-controls="sidebar-panel" data-sidebar-toggle>
 			Menu
 		</button>
@@ -29,7 +29,7 @@ const works = await getWorks();
 		<p class="tagline">{about.tagline}</p>
 
 		<ul class="links">
-			<li><a href={`${base}about/`} aria-current={active === "about" ? "page" : undefined}>About</a></li>
+			<li><a href={`${base}about/`} data-nav="-1" aria-current={active === "about" ? "page" : undefined}>About</a></li>
 			{about.instagram && <li><a href={about.instagram} target="_blank" rel="noopener">Instagram</a></li>}
 			{about.linkedin && <li><a href={about.linkedin} target="_blank" rel="noopener">LinkedIn</a></li>}
 		</ul>
@@ -40,13 +40,13 @@ const works = await getWorks();
 			<h2 class="works-label" id="works-box-label">Selected works</h2>
 			<ul class="works-list">
 				<li>
-					<a href={base} aria-current={active === "all" ? "page" : undefined}>
+					<a href={base} data-nav="all" aria-current={active === "all" ? "page" : undefined}>
 						<span class="work-title">All</span>
 					</a>
 				</li>
-				{works.map((work) => (
+				{works.map((work, i) => (
 					<li>
-						<a href={`${base}works/${work.id}/`} aria-current={active === work.id ? "page" : undefined}>
+						<a href={`${base}works/${work.id}/`} data-nav={i} aria-current={active === work.id ? "page" : undefined}>
 							<span class="work-title">{work.data.title}</span>
 							{work.data.type && <span class="work-type">{work.data.type}</span>}
 						</a>
@@ -65,8 +65,6 @@ const works = await getWorks();
 		z-index: 3; /* column 2 slides in from underneath */
 		height: 100vh;
 		background: var(--bg);
-		/* Captured separately, so it doesn't fade when changing page */
-		view-transition-name: sidebar;
 		font-family: var(--font-mono);
 		color: var(--navy);
 	}

@@ -114,34 +114,3 @@ a {
 	clip: rect(0 0 0 0);
 	white-space: nowrap;
 }
-
-/* ---------- Page-to-page transitions (Chrome, Edge, Safari 18+) ---------- */
-@view-transition {
-	navigation: auto;
-}
-/* Photos glide between their old and new spots */
-::view-transition-group(*) {
-	animation-duration: 0.6s;
-	animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-/* Keep each photo's crop tidy while it changes shape */
-::view-transition-image-pair(*) {
-	overflow: hidden;
-}
-::view-transition-old(*),
-::view-transition-new(*) {
-	height: 100%;
-	object-fit: cover;
-}
-/* Everything else just crossfades, quickly */
-::view-transition-old(root),
-::view-transition-new(root) {
-	animation-duration: 0.3s;
-}
-@media (prefers-reduced-motion: reduce) {
-	::view-transition-group(*),
-	::view-transition-old(*),
-	::view-transition-new(*) {
-		animation: none !important;
-	}
-}

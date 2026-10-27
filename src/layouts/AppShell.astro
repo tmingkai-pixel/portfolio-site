@@ -30,7 +30,7 @@ const {
 const hasInfo = Astro.slots.has("info");
 ---
 
-<html lang="en">
+<html lang="en" data-has-info={hasInfo ? "1" : "0"} data-menu-index={menuIndex ?? ""}>
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
@@ -44,32 +44,32 @@ const hasInfo = Astro.slots.has("info");
 		<meta name="generator" content={Astro.generator} />
 		<title>{title === "Home" ? "Tan Ming-Kai" : `${title} | Tan Ming-Kai`}</title>
 		<script is:inline>
-			// Page-to-page transitions: photos that are on screen on both pages glide from
-			// their old spot to their new one; everything else crossfades. Only on-screen
-			// photos get a transition name, so off-screen ones don't fly in from afar.
+			// Decide how this page enters, before anything is drawn (so nothing jumps):
+			//   All → project/About: column 2 slides in from the left, images rise from below
+			//   page → page with column 2: both come from above if this page is higher in the
+			//   menu than the last one, from below if it's lower
+			//   project/About → All: the collage comes in from above
 			(function () {
-				function nameOnScreen() {
-					var named = [];
-					document.querySelectorAll("[data-vt]").forEach(function (el) {
-						var r = el.getBoundingClientRect();
-						if (r.width > 0 && r.bottom > 0 && r.top < innerHeight) {
-							el.style.viewTransitionName = el.getAttribute("data-vt");
-							named.push(el);
-						}
-					});
-					return named;
+				var html = document.documentElement;
+				if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+				var lastHadInfo, lastIndex;
+				try {
+					lastHadInfo = sessionStorage.getItem("lastHadInfo");
+					lastIndex = sessionStorage.getItem("lastMenuIndex");
+				} catch (e) {}
+				var hasInfo = html.dataset.hasInfo === "1";
+				var here = html.dataset.menuIndex;
+				var dir = "";
+				if (hasInfo && lastHadInfo === "0") {
+					html.dataset.infoEnter = "left";
+					dir = "below";
+				} else if (hasInfo && lastHadInfo === "1" && here !== "" && lastIndex && lastIndex !== here) {
+					dir = Number(here) < Number(lastIndex) ? "above" : "below";
+					html.dataset.infoEnter = dir;
+				} else if (!hasInfo && lastHadInfo === "1") {
+					dir = "above";
 				}
-				function clear(named) {
-					named.forEach(function (el) { el.style.viewTransitionName = ""; });
-				}
-				addEventListener("pageswap", function (e) {
-					if (e.viewTransition) nameOnScreen();
-				});
-				addEventListener("pagereveal", function (e) {
-					if (!e.viewTransition) return;
-					var named = nameOnScreen();
-					e.viewTransition.finished.then(function () { clear(named); });
-				});
+				if (dir) html.dataset.imagesEnter = dir;
 			})();
 		</script>
 	</head>
@@ -93,31 +93,40 @@ const hasInfo = Astro.slots.has("info");
 
 			const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-			// Column 2's entrance:
-			//  - arriving from a page without it (All → project): slides in from under column 1
-			//  - moving between pages that have it: slides in from above if the new page is
-			//    higher in the menu than the last one, from below if it's lower
-			const app = document.querySelector<HTMLElement>(".app")!;
-			const info = document.querySelector<HTMLElement>("[data-info]");
-			let lastHadInfo: string | null = null;
-			let lastIndex: string | null = null;
-			try {
-				lastHadInfo = sessionStorage.getItem("lastHadInfo");
-				lastIndex = sessionStorage.getItem("lastMenuIndex");
-			} catch {}
-			if (info && !reduceMotion) {
-				const here = app.dataset.menuIndex;
-				if (lastHadInfo === "0") {
-					info.classList.add("info--enter");
-				} else if (lastHadInfo === "1" && here !== "" && lastIndex && lastIndex !== "" && lastIndex !== here) {
-					info.classList.add(Number(here) < Number(lastIndex) ? "info--from-above" : "info--from-below");
-				}
-			}
-			addEventListener("pagehide", () => {
+			// Remember where we are, for the next page's entrance (see the head script)
+			const html = document.documentElement;
+			const remember = () => {
 				try {
-					sessionStorage.setItem("lastHadInfo", app.dataset.hasInfo ?? "0");
-					sessionStorage.setItem("lastMenuIndex", app.dataset.menuIndex ?? "");
+					sessionStorage.setItem("lastHadInfo", html.dataset.hasInfo ?? "0");
+					sessionStorage.setItem("lastMenuIndex", html.dataset.menuIndex ?? "");
 				} catch {}
+			};
+			addEventListener("pagehide", remember);
+
+			// Leaving: move the images off screen first, then go. Direction matches the
+			// next page's entrance (up and out when the next one comes from below).
+			const imagesArea = document.querySelector<HTMLElement>(".images");
+			const hereHasInfo = html.dataset.hasInfo === "1";
+			const hereIndex = html.dataset.menuIndex ?? "";
+			document.addEventListener("click", (event) => {
+				const link = (event.target as HTMLElement).closest<HTMLAnchorElement>("a[data-nav]");
+				if (!link || !imagesArea || reduceMotion) return;
+				if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+				if (link.target && link.target !== "_self") return;
+				const target = link.dataset.nav!;
+				let exit = "";
+				if (target === "all") exit = hereHasInfo ? "down" : "";
+				else if (!hereHasInfo) exit = "up";
+				else if (target !== hereIndex) exit = Number(target) < Number(hereIndex) ? "down" : "up";
+				if (!exit) return;
+				event.preventDefault();
+				remember();
+				imagesArea.classList.add(`images--exit-${exit}`);
+				setTimeout(() => location.assign(link.href), 420);
+			});
+			// Coming back with the browser's back button: undo the exit
+			addEventListener("pageshow", (event) => {
+				if (event.persisted) imagesArea?.classList.remove("images--exit-up", "images--exit-down");
 			});
 
 			// Parallax: the dot grid behind the images scrolls at half speed
@@ -241,7 +250,8 @@ const hasInfo = Astro.slots.has("info");
 		font-family: var(--font-mono);
 		color: var(--navy);
 	}
-	.info--enter {
+	/* Column 2 entrance (set by the head script) */
+	:global(html[data-info-enter="left"]) .info {
 		animation: info-slide-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 	}
 	@keyframes info-slide-in {
@@ -252,11 +262,50 @@ const hasInfo = Astro.slots.has("info");
 			transform: none;
 		}
 	}
-	.info--from-above {
+	:global(html[data-info-enter="above"]) .info {
 		animation: info-slide-down 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 	}
-	.info--from-below {
+	:global(html[data-info-enter="below"]) .info {
 		animation: info-slide-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+	}
+
+	/* Images: leave first (on click), then the new page's images arrive after a tiny pause */
+	.images {
+		transition: transform 0.4s cubic-bezier(0.5, 0, 0.9, 0.4), opacity 0.4s ease-in;
+	}
+	.images--exit-up {
+		transform: translateY(-55vh);
+		opacity: 0;
+	}
+	.images--exit-down {
+		transform: translateY(55vh);
+		opacity: 0;
+	}
+	:global(html[data-images-enter="below"]) .images {
+		animation: images-in-below 0.6s cubic-bezier(0.1, 0.6, 0.2, 1) 0.12s both;
+	}
+	:global(html[data-images-enter="above"]) .images {
+		animation: images-in-above 0.6s cubic-bezier(0.1, 0.6, 0.2, 1) 0.12s both;
+	}
+	@keyframes images-in-below {
+		from {
+			transform: translateY(55vh);
+			opacity: 0;
+		}
+		to {
+			transform: none;
+			opacity: 1;
+		}
+	}
+	@keyframes images-in-above {
+		from {
+			transform: translateY(-55vh);
+			opacity: 0;
+		}
+		to {
+			transform: none;
+			opacity: 1;
+		}
 	}
 	@keyframes info-slide-down {
 		from {

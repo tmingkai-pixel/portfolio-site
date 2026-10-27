@@ -14,8 +14,8 @@ const base = import.meta.env.BASE_URL;
 const works = await getWorks();
 const exists = (mediaPath: string) => fs.existsSync(path.join(process.cwd(), "public", "media", mediaPath));
 
-type Tile = { src: string; href: string; alt: string };
-const perProject: Tile[][] = works.map((work) => {
+type Tile = { src: string; href: string; alt: string; nav: number };
+const perProject: Tile[][] = works.map((work, index) => {
 	const { data } = work;
 	const href = `${base}works/${work.id}/`;
 	const tiles: Tile[] = [];
@@ -24,7 +24,7 @@ const perProject: Tile[][] = works.map((work) => {
 		const src = workMedia(work.id, file);
 		if (!isImageFile(file) || seen.has(src) || !exists(src)) return;
 		seen.add(src);
-		tiles.push({ src, href: link, alt: data.title });
+		tiles.push({ src, href: link, alt: data.title, nav: index });
 	};
 	if (data.template === "tabs") {
 		const ids = pieceIds(data.pieces.map((p) => p.title));
@@ -46,7 +46,7 @@ for (let i = 0; perProject.some((list) => i < list.length); i++) {
 
 <div class="collage">
 	{tiles.map((tile) => (
-		<a class="collage-tile" href={tile.href} aria-label={`Open ${tile.alt}`}>
+		<a class="collage-tile" href={tile.href} data-nav={tile.nav} aria-label={`Open ${tile.alt}`}>
 			<Media src={tile.src} alt="" class="collage-media" sizes="(max-width: 899px) 50vw, 25vw" widths={[400, 700, 1000]} />
 		</a>
 	))}
