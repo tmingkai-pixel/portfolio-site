@@ -1,5 +1,6 @@
 ---
 title: Box Yeti Mascot
+type: Illustration
 category: Commercial Work
 summary: Mascot design for BoxYeti, a storage-solutions brand of Paper Carpenter.
 role: Illustration, Character Design, Prepress

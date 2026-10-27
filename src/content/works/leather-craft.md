@@ -1,5 +1,6 @@
 ---
 title: Leather Craft
+type: Product
 category: Personal Work
 summary: A sample of my leather crafting works over the years, creating pieces
   for daily life.

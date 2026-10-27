@@ -13,6 +13,8 @@
 	--orange: #e17b0a;
 	--navy: #1c3184;
 	--label: #8e8eaa;
+	/* Thin dashed rules around boxes in the menu and info columns */
+	--rule: #9e9eb2;
 	--placeholder: #c4c4c4;
 	--font-sans: "Inter Variable", "Helvetica Neue", Helvetica, Arial, sans-serif;
 	--font-mono: "Geist Mono Variable", ui-monospace, monospace;
@@ -101,4 +103,14 @@ a {
 		transition: none !important;
 		scroll-behavior: auto !important;
 	}
+}
+
+/* Hidden on screen but read by screen readers */
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
 }

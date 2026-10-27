@@ -1,5 +1,6 @@
 ---
 title: 3D Printing
+type: Product
 category: 3D Printing
 summary: "A selection of my favourite 3D printing projects, each purpose built
   to solve a specific daily problem. "

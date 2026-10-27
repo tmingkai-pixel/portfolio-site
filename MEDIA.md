@@ -32,11 +32,17 @@ and delete `draft: true` when it's ready.
 
 Every save is recorded on GitHub, so any mistake can be undone.
 
-### Editing the Home and About pages
-- **Home page** (Pages CMS sidebar): headline, byline, hero slideshow videos and
-  the bio paragraphs. Put *asterisks* around words to show them in white.
-- **About page**: portrait, name, intro, contact email, LinkedIn, skills,
-  education and work experience. Drag items to reorder them.
+### The site layout
+Every page has the menu on the left (tagline, About / Instagram / LinkedIn,
+Contact Me, Selected Works). **All** (the home page) shows a collage of every
+project's photos. Opening a project slides in its info column; its photos fill
+the right-hand columns.
+
+- **Works → Projects → Type**: the short word shown next to each project in the
+  Selected Works list (e.g. Product, Exhibit).
+- **About page**: tagline (top of the menu on every page), bio paragraphs,
+  About photos (the image columns on the About page), Instagram link (blank =
+  hidden), plus experience, education and skills.
 
 ### Changing the order of projects
 Click **Works → Order** in the Pages CMS sidebar, drag projects up or down, and

@@ -1,0 +1,89 @@
+---
+/**
+ * Landing page ("All"): every project's photos mixed into one scrollable
+ * collage, three columns wide. Photos are interleaved project by project
+ * (in Works order) so they mix, and each one links to its project — or
+ * straight to its piece on Tabs projects.
+ */
+import fs from "node:fs";
+import path from "node:path";
+import Media from "./Media.astro";
+import { getWorks, workMedia, pieceIds, isImageFile } from "../lib/works";
+
+const base = import.meta.env.BASE_URL;
+const works = await getWorks();
+const exists = (mediaPath: string) => fs.existsSync(path.join(process.cwd(), "public", "media", mediaPath));
+
+type Tile = { src: string; href: string; alt: string };
+const perProject: Tile[][] = works.map((work) => {
+	const { data } = work;
+	const href = `${base}works/${work.id}/`;
+	const tiles: Tile[] = [];
+	const seen = new Set<string>();
+	const add = (file: string, link = href) => {
+		const src = workMedia(work.id, file);
+		if (!isImageFile(file) || seen.has(src) || !exists(src)) return;
+		seen.add(src);
+		tiles.push({ src, href: link, alt: data.title });
+	};
+	if (data.template === "tabs") {
+		const ids = pieceIds(data.pieces.map((p) => p.title));
+		data.pieces.forEach((piece, i) => piece.media.forEach((file) => add(file, `${href}#${ids[i]}`)));
+	} else {
+		add(data.cover);
+		data.story.forEach((group) => group.rows.forEach((row) => row.images.forEach((img) => add(img.src))));
+		data.gallery.forEach((file) => add(file));
+	}
+	return tiles;
+});
+
+// Round-robin: one photo from each project in turn, so the collage mixes them
+const tiles: Tile[] = [];
+for (let i = 0; perProject.some((list) => i < list.length); i++) {
+	for (const list of perProject) if (list[i]) tiles.push(list[i]);
+}
+---
+
+<div class="collage">
+	{tiles.map((tile) => (
+		<a class="collage-tile" href={tile.href} aria-label={`Open ${tile.alt}`}>
+			<Media src={tile.src} alt="" class="collage-media" sizes="(max-width: 899px) 50vw, 25vw" widths={[400, 700, 1000]} />
+		</a>
+	))}
+</div>
+
+<style>
+	.collage {
+		columns: 3;
+		column-gap: 1.8vw;
+	}
+	.collage-tile {
+		display: block;
+		break-inside: avoid;
+		margin-bottom: 1.8vw;
+		outline-offset: 3px;
+	}
+	.collage-tile :global(.collage-media),
+	.collage-tile :global(img) {
+		display: block;
+		width: 100%;
+		height: auto;
+		transition: opacity 0.2s ease;
+	}
+	.collage-tile:hover :global(img) {
+		opacity: 0.85;
+	}
+	.collage-tile:focus-visible {
+		outline: 3px solid var(--orange);
+	}
+
+	@media (max-width: 899px) {
+		.collage {
+			columns: 2;
+			column-gap: 10px;
+		}
+		.collage-tile {
+			margin-bottom: 10px;
+		}
+	}
+</style>

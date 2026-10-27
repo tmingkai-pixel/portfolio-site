@@ -1,5 +1,6 @@
 ---
 title: One Thing A Day
+type: Animation
 category: Personal Work
 summary: A body of work I've been committed to over the span of almost 3 weeks.
   I aim to create something everyday - no matter what the subject is.

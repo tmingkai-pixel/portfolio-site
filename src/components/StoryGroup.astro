@@ -63,7 +63,7 @@ closeRun();
 
 // How wide each image is shown, so the browser picks the right file size
 const sizesFor = (layout: Row["layout"], image: StoryImage) => {
-	const desktop = wide.has(image) ? "41vw" : "20vw";
+	const desktop = wide.has(image) ? "52vw" : "26vw";
 	const phone = layout === "full" ? "100vw" : layout === "trio" ? "72vw" : "50vw";
 	return `(max-width: 749px) ${phone}, ${desktop}`;
 };

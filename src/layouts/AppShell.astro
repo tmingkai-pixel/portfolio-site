@@ -1,0 +1,257 @@
+---
+/**
+ * The 4-column page frame used by every page:
+ *   column 1: the persistent menu (Sidebar)
+ *   column 2: the info column (project / About), optional — slides in from under column 1
+ *   columns 3–4 (or 2–4 when there's no info column): the scrollable image area
+ */
+import Sidebar from "../components/Sidebar.astro";
+import "../styles/global.css";
+
+interface Props {
+	title: string;
+	description?: string;
+	/** "all", "about", or the current project's id: highlights it in the menu */
+	active: string;
+	/** Keep this page out of search engines (used for draft previews) */
+	noindex?: boolean;
+}
+
+const {
+	title,
+	description = "Tan Ming-Kai — multi-disciplinary designer. Graphic design, 3D printing, and structural cardboard craft.",
+	active,
+	noindex = false,
+} = Astro.props;
+const hasInfo = Astro.slots.has("info");
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!-- The site is designed light-only: ask browsers' auto-dark modes and
+		     dark-mode extensions (e.g. Dark Reader) not to recolour it -->
+		<meta name="color-scheme" content="only light" />
+		<meta name="darkreader-lock" />
+		<meta name="description" content={description} />
+		{noindex && <meta name="robots" content="noindex, nofollow" />}
+		<meta name="generator" content={Astro.generator} />
+		<title>{title === "Home" ? "Tan Ming-Kai" : `${title} | Tan Ming-Kai`}</title>
+	</head>
+	<body>
+		<slot name="before" />
+		<div class:list={["app", hasInfo ? "app--info" : "app--wide"]} data-has-info={hasInfo ? "1" : "0"}>
+			<Sidebar active={active} />
+			{hasInfo && (
+				<aside class="info" data-info>
+					<slot name="info" />
+				</aside>
+			)}
+			<main class="images" data-lightbox>
+				<slot />
+			</main>
+		</div>
+
+		<script>
+			import PhotoSwipeLightbox from "photoswipe/lightbox";
+			import "photoswipe/style.css";
+
+			const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+			// Column 2 slides in from under column 1 when arriving from a page without it
+			// (e.g. landing → project). Moving between projects doesn't replay it.
+			const app = document.querySelector<HTMLElement>(".app")!;
+			const info = document.querySelector<HTMLElement>("[data-info]");
+			let cameFromWide = false;
+			try {
+				cameFromWide = sessionStorage.getItem("lastHadInfo") === "0";
+			} catch {}
+			if (info && cameFromWide && !reduceMotion) info.classList.add("info--enter");
+			addEventListener("pagehide", () => {
+				try {
+					sessionStorage.setItem("lastHadInfo", app.dataset.hasInfo ?? "0");
+				} catch {}
+			});
+
+			// Ambient videos only load and play while on screen
+			const observer = new IntersectionObserver((entries) => {
+				for (const { target, isIntersecting } of entries) {
+					const video = target as HTMLVideoElement;
+					if (isIntersecting && !reduceMotion) video.play().catch(() => {});
+					else video.pause();
+				}
+			}, { rootMargin: "200px" });
+			for (const video of document.querySelectorAll("video[data-ambient]")) observer.observe(video);
+
+			// "Sound on" buttons: unmute one video at a time
+			const toggles = [...document.querySelectorAll<HTMLButtonElement>("[data-sound-toggle]")];
+			for (const button of toggles) {
+				button.addEventListener("click", () => {
+					const turnOn = button.getAttribute("aria-pressed") !== "true";
+					for (const other of toggles) {
+						other.setAttribute("aria-pressed", "false");
+						other.textContent = "Sound on";
+						(other.previousElementSibling as HTMLVideoElement).muted = true;
+					}
+					if (turnOn) {
+						const video = button.previousElementSibling as HTMLVideoElement;
+						video.muted = false;
+						video.play().catch(() => {});
+						button.setAttribute("aria-pressed", "true");
+						button.textContent = "Sound off";
+					}
+				});
+			}
+
+			// Full-screen viewer for any linked image. Arrow keys move, Esc closes.
+			const lightbox = new PhotoSwipeLightbox({
+				gallery: "[data-lightbox]",
+				// Skip photos in hidden pieces (Tabs projects)
+				children: "a.lightbox-link:not([hidden] a)",
+				pswpModule: () => import("photoswipe"),
+				bgOpacity: 0.94,
+				showHideAnimationType: reduceMotion ? "none" : "zoom",
+				showAnimationDuration: reduceMotion ? 0 : 250,
+				hideAnimationDuration: reduceMotion ? 0 : 250,
+				zoomAnimationDuration: reduceMotion ? 0 : 250,
+				// Keep the close/arrow buttons on screen at all times
+				idleTime: 1e9,
+				tapAction: "close",
+				closeTitle: "Close (Esc)",
+				arrowPrevTitle: "Previous (left arrow)",
+				arrowNextTitle: "Next (right arrow)",
+			});
+			lightbox.addFilter("domItemData", (itemData, element) => {
+				const img = element.querySelector("img");
+				if (img) {
+					itemData.alt = img.alt;
+					itemData.thumbCropped = true;
+				}
+				return itemData;
+			});
+			lightbox.on("uiRegister", () => {
+				lightbox.pswp?.ui?.registerElement({
+					name: "caption",
+					order: 9,
+					isButton: false,
+					appendTo: "root",
+					onInit: (el, pswp) => {
+						pswp.on("change", () => {
+							const link = pswp.currSlide?.data.element;
+							const caption = link?.closest("figure")?.querySelector("figcaption")?.textContent;
+							el.textContent = caption || pswp.currSlide?.data.alt || "";
+						});
+					},
+				});
+			});
+			lightbox.init();
+		</script>
+	</body>
+</html>
+
+<style>
+	/* ---------- The column grid (desktop) ---------- */
+	.app {
+		display: grid;
+		min-height: 100vh;
+		align-items: start;
+	}
+	.app--info {
+		grid-template-columns: 20.5vw 24.5vw minmax(0, 1fr);
+	}
+	.app--wide {
+		grid-template-columns: 20.5vw minmax(0, 1fr);
+	}
+
+	/* Column 2: pinned full height; its own sections scroll inside it */
+	.info {
+		position: sticky;
+		top: 0;
+		z-index: 2;
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		padding: 1vw 1.1vw 1vw 1vw;
+		background: var(--bg);
+		font-family: var(--font-mono);
+		color: var(--navy);
+	}
+	.info--enter {
+		animation: info-slide-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+	}
+	@keyframes info-slide-in {
+		from {
+			transform: translateX(-100%);
+		}
+		to {
+			transform: none;
+		}
+	}
+
+	/* Image area: dot grid behind, scrolls with the page */
+	.images {
+		position: relative;
+		min-width: 0;
+		min-height: 100vh;
+		padding: 1vw 1.1vw 3vw;
+		color: var(--navy);
+		background-color: var(--bg);
+		background-image: radial-gradient(circle, var(--navy) 0.05vw, transparent 0.065vw);
+		background-size: 1.11vw 1.11vw;
+		background-position: center top;
+	}
+
+	/* Full-screen viewer (PhotoSwipe) caption and controls, in the site's colours */
+	:global(.pswp__caption) {
+		position: absolute;
+		left: 50%;
+		bottom: 16px;
+		transform: translateX(-50%);
+		max-width: min(90vw, 760px);
+		padding: 8px 14px;
+		background: var(--navy);
+		color: #fff;
+		font-family: var(--font-mono);
+		font-size: 14px;
+		line-height: 1.4;
+		text-align: center;
+	}
+	:global(.pswp__caption:empty) {
+		display: none;
+	}
+	:global(.pswp__button) {
+		min-width: 44px;
+		min-height: 44px;
+	}
+	:global(.pswp--idle .pswp__top-bar),
+	:global(.pswp--idle .pswp__button--arrow) {
+		opacity: 1 !important;
+	}
+	:global(.pswp__button:focus-visible) {
+		outline: 3px solid var(--orange);
+		outline-offset: -3px;
+	}
+
+	/* ---------- Phones: menu bar on top, then the info, then the images ---------- */
+	@media (max-width: 899px) {
+		.app,
+		.app--info,
+		.app--wide {
+			display: block;
+		}
+		.info {
+			position: static;
+			height: auto;
+			padding: 16px;
+		}
+		.images {
+			min-height: 0;
+			padding: 12px 16px 40px;
+			background-size: 14px 14px;
+			background-image: radial-gradient(circle, var(--navy) 0.7px, transparent 0.9px);
+		}
+	}
+</style>

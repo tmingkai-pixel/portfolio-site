@@ -38,6 +38,10 @@ content:
             label: Title
             type: string
             required: true
+          - name: type
+            label: Type (short)
+            type: string
+            description: One or two words shown next to the title in the Selected Works list, e.g. Product, Exhibit, Animation.
           - name: category
             label: Category
             type: select
@@ -223,41 +227,33 @@ content:
               value: "{path}"
               label: "{title}"
 
-  - name: home-page
-    label: Home page
-    type: file
-    path: src/data/home.json
-    format: json
-    fields:
-      - name: headline
-        label: Headline
-        type: text
-        required: true
-        description: The big orange title. Press Enter where you want the line to break.
-      - name: byline
-        label: Byline
-        type: string
-        description: Small text under the headline, e.g. "By Tan Ming-Kai".
-      - name: heroMedia
-        label: Hero slideshow
-        type: file
-        description: Videos or images in the box at the top right. Visitors can flip through them with the arrows.
-        options:
-          path: public/media/home
-          categories: [image, video]
-          multiple: true
-      - name: bio
-        label: Bio paragraphs
-        type: text
-        list: true
-        description: The orange text on the navy band. Put *asterisks* around words to show them in white, e.g. "with *5 years* in".
-
   - name: about-page
     label: About page
     type: file
     path: src/data/about.json
     format: json
     fields:
+      - name: tagline
+        label: Tagline
+        type: text
+        description: The short line at the top of the left-hand menu on every page.
+      - name: bio
+        label: Bio paragraphs
+        type: text
+        list: true
+        description: The About text, one paragraph per entry.
+      - name: photos
+        label: About photos
+        type: file
+        description: Photos shown in the image columns on the About page. JPGs under 3 MB each.
+        options:
+          path: public/media/about
+          categories: [image]
+          multiple: true
+      - name: instagram
+        label: Instagram link
+        type: string
+        description: Full address, starting with https:// (leave blank to hide Instagram in the menu).
       - name: portrait
         label: Portrait photo
         type: file

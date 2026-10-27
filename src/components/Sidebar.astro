@@ -1,0 +1,246 @@
+---
+/**
+ * Column 1: the persistent menu on every page. Tagline, About / Instagram /
+ * LinkedIn, Contact Me, and the Selected Works list (scrolls when long).
+ * On phones it folds into a top bar with a menu button.
+ */
+import about from "../data/about.json";
+import { getWorks } from "../lib/works";
+
+interface Props {
+	/** "all" on the landing page, "about" on About, or the current project's id */
+	active: string;
+}
+
+const { active } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const works = await getWorks();
+---
+
+<nav class="sidebar" aria-label="Main" data-sidebar>
+	<div class="sidebar-bar">
+		<a class="sidebar-name" href={base}>{about.name}</a>
+		<button type="button" class="sidebar-toggle" aria-expanded="false" aria-controls="sidebar-panel" data-sidebar-toggle>
+			Menu
+		</button>
+	</div>
+
+	<div class="sidebar-panel" id="sidebar-panel">
+		<p class="tagline">{about.tagline}</p>
+
+		<ul class="links">
+			<li><a href={`${base}about/`} aria-current={active === "about" ? "page" : undefined}>About</a></li>
+			{about.instagram && <li><a href={about.instagram} target="_blank" rel="noopener">Instagram</a></li>}
+			{about.linkedin && <li><a href={about.linkedin} target="_blank" rel="noopener">LinkedIn</a></li>}
+		</ul>
+
+		<a class="contact" href={`mailto:${about.email}?subject=Hello!`}>Contact Me</a>
+
+		<section class="works-box" aria-labelledby="works-box-label">
+			<h2 class="works-label" id="works-box-label">Selected works</h2>
+			<ul class="works-list">
+				<li>
+					<a href={base} aria-current={active === "all" ? "page" : undefined}>
+						<span class="work-title">All</span>
+					</a>
+				</li>
+				{works.map((work) => (
+					<li>
+						<a href={`${base}works/${work.id}/`} aria-current={active === work.id ? "page" : undefined}>
+							<span class="work-title">{work.data.title}</span>
+							{work.data.type && <span class="work-type">{work.data.type}</span>}
+						</a>
+					</li>
+				))}
+			</ul>
+		</section>
+	</div>
+</nav>
+
+<style>
+	/* Desktop values in vw, measured from the reference designs */
+	.sidebar {
+		position: sticky;
+		top: 0;
+		z-index: 3; /* column 2 slides in from underneath */
+		height: 100vh;
+		background: var(--bg);
+		font-family: var(--font-mono);
+		color: var(--navy);
+	}
+	.sidebar-bar {
+		display: none;
+	}
+	.sidebar-panel {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		padding: 1vw 1vw 1vw 1.05vw;
+	}
+	.tagline {
+		margin: 0;
+		font-size: 0.92vw;
+		line-height: 1.15;
+		max-width: 19vw;
+	}
+	.links {
+		list-style: none;
+		margin: 3.4vw 0 0;
+		padding: 0;
+		font-size: 0.92vw;
+		line-height: 1.15;
+	}
+	.links a,
+	.contact {
+		color: inherit;
+		text-decoration: none;
+	}
+	.links a:hover,
+	.contact:hover {
+		color: var(--orange);
+	}
+	.links a[aria-current="page"] {
+		background: var(--orange);
+		color: #fff;
+		padding: 0 0.15em;
+		margin-left: -0.15em;
+	}
+	.contact {
+		margin-top: 4vw;
+		font-size: 0.92vw;
+		align-self: flex-start;
+	}
+
+	/* Selected works: a dashed box at the bottom; the list scrolls when it gets long */
+	.works-box {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		margin-top: auto;
+		max-height: 50vh;
+		border: 1px dashed var(--rule);
+	}
+	.works-label {
+		margin: 0;
+		padding: 0.95vw 0.7vw;
+		border-bottom: 1px dashed var(--rule);
+		color: var(--label);
+		font-size: 0.72vw;
+		font-weight: 400;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+	}
+	.works-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		overflow-y: auto;
+		scrollbar-width: thin;
+	}
+	.works-list li + li {
+		border-top: 1px dashed var(--rule);
+	}
+	.works-list a {
+		display: grid;
+		grid-template-columns: 1fr 7vw;
+		gap: 0.6vw;
+		align-items: center;
+		min-height: 2.4vw;
+		padding: 0.55vw 0.7vw;
+		color: var(--navy);
+		font-size: 0.72vw;
+		text-decoration: none;
+	}
+	.works-list a:hover {
+		color: var(--orange);
+	}
+	.works-list a[aria-current="page"] {
+		background: var(--orange);
+		color: #fff;
+	}
+	.work-title {
+		overflow-wrap: anywhere;
+	}
+
+	/* ---------- Phones: a top bar with a menu button ---------- */
+	@media (max-width: 899px) {
+		.sidebar {
+			height: auto;
+			border-bottom: 1px dashed var(--rule);
+		}
+		.sidebar-bar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			padding: 4px 16px;
+			min-height: 52px;
+		}
+		.sidebar-name {
+			color: var(--navy);
+			font-size: 14px;
+			text-decoration: none;
+		}
+		.sidebar-toggle {
+			min-width: 44px;
+			min-height: 44px;
+			padding: 0 12px;
+			background: none;
+			border: 1px dashed var(--navy);
+			color: var(--navy);
+			font: inherit;
+			font-size: 13px;
+			cursor: pointer;
+		}
+		.sidebar-panel {
+			display: none;
+			height: auto;
+			padding: 4px 16px 18px;
+		}
+		.sidebar.open .sidebar-panel {
+			display: flex;
+		}
+		.tagline,
+		.links,
+		.contact {
+			font-size: 14px;
+			max-width: none;
+		}
+		.links {
+			margin-top: 20px;
+		}
+		.links a {
+			display: inline-block;
+			padding: 6px 0;
+		}
+		.contact {
+			margin-top: 12px;
+			padding: 6px 0;
+		}
+		.works-box {
+			margin-top: 20px;
+			max-height: 60vh;
+		}
+		.works-label {
+			padding: 12px;
+			font-size: 11px;
+		}
+		.works-list a {
+			grid-template-columns: 1fr 96px;
+			min-height: 44px;
+			padding: 10px 12px;
+			font-size: 13px;
+		}
+	}
+</style>
+
+<script>
+	for (const sidebar of document.querySelectorAll<HTMLElement>("[data-sidebar]")) {
+		const toggle = sidebar.querySelector<HTMLButtonElement>("[data-sidebar-toggle]")!;
+		toggle.addEventListener("click", () => {
+			const open = sidebar.classList.toggle("open");
+			toggle.setAttribute("aria-expanded", String(open));
+			toggle.textContent = open ? "Close" : "Menu";
+		});
+	}
+</script>

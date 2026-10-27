@@ -1,5 +1,6 @@
 ---
 title: UNIQLO Sustainability Pop-Up
+type: Exhibit
 category: Commercial Work
 summary: An eco-friendly recyclable cardboard space for the RE.UNIQLO Corner.
 role: Graphic Design, Product Design

@@ -1,4 +1,5 @@
 {
+  "tagline": "Multi-disciplinary designer with 5+ years of experience managing design projects from conceptualisation to finished product.",
   "name": "Tan Ming-Kai",
   "intro": "A multi-disciplinary designer with 5+ years of experience managing design projects from conceptualisation to finished product.",
   "email": "tmingkai2@gmail.com",
@@ -74,5 +75,17 @@
       ]
     }
   ],
-  "portrait": "/media/works/ming2026.jpg"
+  "portrait": "/media/works/ming2026.jpg",
+  "instagram": "",
+  "bio": [
+    "This is Ming-Kai.",
+    "He's drawn to problems that need solving, ideas worth exploring, and the little details that make things click.",
+    "Outside of design, he spends his time immersed in hard sci-fi, and occasionally reading a book while listening to the audiobook at the same time (yes, simultaneously).",
+    "He also loves cats, sandbox games, and asking hard questions.",
+    "Curiosity is never wasted, and there's always something worth exploring.",
+    "Ming also hates writing about himself."
+  ],
+  "photos": [
+    "/media/works/ming2026.jpg"
+  ]
 }

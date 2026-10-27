@@ -1,0 +1,81 @@
+---
+/**
+ * Photos in two columns, the right column dropped lower so they stagger like
+ * the reference designs. Photos keep their own shape (no cropping) and open
+ * in the full-screen viewer. Videos play in place. One column on phones.
+ */
+import Media from "./Media.astro";
+
+type Item = { src: string; alt: string; sound?: boolean };
+
+interface Props {
+	/** `src` is a path inside public/media/ */
+	items: Item[];
+	/** Anything else (id, data-*, role, hidden…) goes on the wrapper */
+	[attr: string]: unknown;
+}
+
+const { items, ...attrs } = Astro.props;
+const columns: Item[][] = [[], []];
+items.forEach((item, i) => columns[i % 2].push(item));
+---
+
+<div class="stagger" {...attrs}>
+	{columns.map((column, c) => (
+		<div class:list={["stagger-col", c === 1 && "stagger-col--offset"]}>
+			{column.map((item) => (
+				<Media
+					src={item.src}
+					alt={item.alt}
+					class="stagger-media"
+					sound={item.sound}
+					sizes="(max-width: 899px) 100vw, 25vw"
+					widths={[480, 800, 1200]}
+					lightbox
+				/>
+			))}
+		</div>
+	))}
+</div>
+
+<style>
+	.stagger {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 2.2vw;
+		align-items: start;
+	}
+	.stagger[hidden] {
+		display: none;
+	}
+	.stagger-col {
+		display: flex;
+		flex-direction: column;
+		gap: 1.8vw;
+		min-width: 0;
+	}
+	/* The right-hand column starts lower, so the photos stagger */
+	.stagger-col--offset {
+		padding-top: 9vw;
+	}
+	.stagger-col :global(.stagger-media),
+	.stagger-col :global(.stagger-media img),
+	.stagger-col :global(video) {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
+	@media (max-width: 899px) {
+		.stagger {
+			grid-template-columns: 1fr;
+			gap: 12px;
+		}
+		.stagger-col {
+			gap: 12px;
+		}
+		.stagger-col--offset {
+			padding-top: 0;
+		}
+	}
+</style>

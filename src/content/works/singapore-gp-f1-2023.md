@@ -1,5 +1,6 @@
 ---
 title: Singapore GP F1 2023
+type: Exhibit
 category: Commercial Work
 summary: Cardboard creations built with the PaperConnect™ building system and
   GAIA boards for the race weekend.

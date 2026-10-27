@@ -42,3 +42,19 @@ export const workMedia = (id: string, file: string) =>
 
 /** Path inside public/media/ for a "/media/..." path from a content file */
 export const mediaPath = (file: string) => file.replace(/^\/?media\//, "");
+
+/** URL-friendly ids for a Tabs project's pieces (used for #links), unique within the project */
+export function pieceIds(titles: string[]) {
+	const slugify = (text: string) =>
+		text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "piece";
+	const used = new Set<string>();
+	return titles.map((title) => {
+		let id = slugify(title);
+		for (let n = 2; used.has(id); n++) id = `${slugify(title)}-${n}`;
+		used.add(id);
+		return id;
+	});
+}
+
+/** True for still images (the collage and staggered grids skip nothing else) */
+export const isImageFile = (file: string) => /\.(jpe?g|png|webp)$/i.test(file);
