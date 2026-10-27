@@ -64,6 +64,7 @@ const skills = [...(about.techSkills ?? []), ...(about.softSkills ?? [])].filter
 <style>
 	.card {
 		flex: 0 0 auto;
+		margin-bottom: 1.8vw;
 		border: 1px dashed var(--rule);
 		padding: 0.75vw 0.7vw 0.9vw;
 	}
@@ -88,12 +89,14 @@ const skills = [...(about.techSkills ?? []), ...(about.softSkills ?? [])].filter
 		margin-bottom: 0;
 	}
 
+	/* Bottom section: hugs its contents and sits flush with the bottom of the
+	   column; if it's taller than the space left, it fills it and scrolls */
 	.scroll-box {
-		flex: 1 1 auto;
-		min-height: 6vw;
+		flex: 0 1 auto;
+		min-height: 0;
 		display: flex;
 		flex-direction: column;
-		margin-top: 1.8vw;
+		margin-top: auto;
 		border: 1px dashed var(--rule);
 	}
 	.scroll-box__label {
@@ -101,11 +104,15 @@ const skills = [...(about.techSkills ?? []), ...(about.softSkills ?? [])].filter
 		padding: 0.95vw 0.7vw;
 		border-bottom: 1px dashed var(--rule);
 	}
+	.scroll-box__body::-webkit-scrollbar {
+		display: none;
+	}
 	.scroll-box__body {
 		flex: 1 1 auto;
 		min-height: 0;
 		overflow-y: auto;
-		scrollbar-width: thin;
+		/* Scrolls without showing a scrollbar */
+		scrollbar-width: none;
 		font-size: 0.8vw;
 		line-height: 1.4;
 	}
@@ -142,6 +149,7 @@ const skills = [...(about.techSkills ?? []), ...(about.softSkills ?? [])].filter
 	@media (max-width: 899px) {
 		.card {
 			padding: 12px;
+			margin-bottom: 16px;
 		}
 		.card-label {
 			font-size: 11px;
@@ -151,7 +159,7 @@ const skills = [...(about.techSkills ?? []), ...(about.softSkills ?? [])].filter
 			font-size: 15px;
 		}
 		.scroll-box {
-			margin-top: 16px;
+			margin-top: 0;
 		}
 		.scroll-box__label,
 		.cv-section,
