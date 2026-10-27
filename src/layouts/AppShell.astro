@@ -226,6 +226,25 @@ const hasInfo = Astro.slots.has("info");
 					location.assign(url);
 					return;
 				}
+				// Each page type has its own styles in <head>: add any this page hasn't got yet
+				// (and wait for new stylesheet files, so nothing shows unstyled)
+				const styleKey = (el: Element) =>
+					el instanceof HTMLLinkElement ? el.href : el.getAttribute("data-vite-dev-id") ?? el.textContent;
+				const have = new Set([...document.head.querySelectorAll('style, link[rel="stylesheet"]')].map(styleKey));
+				const loading: Promise<unknown>[] = [];
+				for (const el of doc.head.querySelectorAll('style, link[rel="stylesheet"]')) {
+					if (have.has(styleKey(el))) continue;
+					const copy = document.importNode(el, true);
+					if (copy instanceof HTMLLinkElement) {
+						loading.push(new Promise((done) => {
+							copy.addEventListener("load", done);
+							copy.addEventListener("error", done);
+						}));
+					}
+					document.head.append(copy);
+				}
+				await Promise.all(loading);
+
 				for (const animation of running) animation.finish();
 				running = [];
 
@@ -268,7 +287,7 @@ const hasInfo = Astro.slots.has("info");
 				for (const el of [...document.body.children]) if (el !== dots && el.compareDocumentPosition(app) & Node.DOCUMENT_POSITION_FOLLOWING) el.remove();
 				for (const el of [...doc.body.children]) {
 					if (el === nextApp) break;
-					if (!el.matches(".dots, script")) app.before(document.adoptNode(el));
+					if (!el.matches(".dots, script")) app.before(document.importNode(el, true));
 				}
 				app.className = nextApp.className;
 				html.dataset.hasInfo = doc.documentElement.dataset.hasInfo;
@@ -288,9 +307,9 @@ const hasInfo = Astro.slots.has("info");
 				if (sidebar?.classList.contains("open")) sidebar.querySelector<HTMLButtonElement>("[data-sidebar-toggle]")?.click();
 
 				const nextInfo = nextApp.querySelector<HTMLElement>(":scope > .info");
-				const newInfo = nextInfo ? document.adoptNode(nextInfo) : null;
+				const newInfo = nextInfo ? document.importNode(nextInfo, true) : null;
 				if (newInfo) main.before(newInfo);
-				const newTrack = document.adoptNode(nextTrack);
+				const newTrack = document.importNode(nextTrack, true);
 				main.append(newTrack);
 
 				if (push) history.pushState(null, "", url);
