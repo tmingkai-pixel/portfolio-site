@@ -167,14 +167,14 @@ const hasInfo = Astro.slots.has("info");
 			let running: Animation[] = [];
 			// Outgoing pieces hold their end position and are removed as soon as their
 			// own slide ends, so they never snap back over the new page
-			const slide = (el: Element, from: string, to: string, fade = false, delay = 0) => {
+			const slide = (el: Element, from: string, to: string, fade = false, delay = 0, duration = DURATION) => {
 				const leavingPage = from === "none";
 				const animation = el.animate(
 					[
 						{ transform: from, ...(fade && { opacity: to === "none" ? 0 : 1 }) },
 						{ transform: to, ...(fade && { opacity: to === "none" ? 1 : 0 }) },
 					],
-					{ duration: DURATION, easing: EASE, delay, fill: leavingPage ? "both" : "backwards" },
+					{ duration, easing: EASE, delay, fill: leavingPage ? "both" : "backwards" },
 				);
 				if (leavingPage) animation.addEventListener("finish", () => el.remove());
 				running.push(animation);
@@ -437,7 +437,7 @@ const hasInfo = Astro.slots.has("info");
 				const track = main.querySelector<HTMLElement>("[data-track]")!;
 				readyMedia(track).then(() => {
 					if (!("intro" in html.dataset)) return; // already shown by the fallback
-					slide(track, "translateY(100vh)", "none", true);
+					slide(track, "translateY(100vh)", "none", true, 0, 1600); // slower than page changes
 					delete html.dataset.intro;
 				});
 			}
