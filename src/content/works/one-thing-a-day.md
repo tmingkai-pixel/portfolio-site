@@ -123,6 +123,7 @@ pieces:
       first bridge tower you encounter bandits at in Skyrim.
     media:
       - /media/works/one-thing-a-day/bad-outpost.jpg
+  - title: 018-Cyberpunk Terminal
 sound:
   - /media/works/one-thing-a-day/braun combiscope/combiscope.mp4
   - /media/works/one-thing-a-day/front door/front-door.mp4
