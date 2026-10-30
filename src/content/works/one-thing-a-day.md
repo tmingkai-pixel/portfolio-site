@@ -124,6 +124,16 @@ pieces:
     media:
       - /media/works/one-thing-a-day/bad-outpost.jpg
   - title: 018-Cyberpunk Terminal
+    caption: 'Cyberpunk/ Scifi things require so many greebles, like heat radiators,
+      battery cells, wiring, not to mention the general weathering required to
+      sell the whole "dystopian" aesthetic. '
+    media:
+      - /media/works/one-thing-a-day/cyberpunk terminal/render0001-0072.mp4
+      - /media/works/one-thing-a-day/cyberpunk terminal/shot-5.jpg
+      - /media/works/one-thing-a-day/cyberpunk terminal/shot-1.jpg
+      - /media/works/one-thing-a-day/cyberpunk terminal/shot-4.jpg
+      - /media/works/one-thing-a-day/cyberpunk terminal/shot-2.jpg
+      - /media/works/one-thing-a-day/cyberpunk terminal/shot-3.jpg
 sound:
   - /media/works/one-thing-a-day/braun combiscope/combiscope.mp4
   - /media/works/one-thing-a-day/front door/front-door.mp4
