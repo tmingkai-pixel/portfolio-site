@@ -54,6 +54,8 @@ const works = await getWorks();
 				))}
 			</ul>
 		</section>
+
+		<p class="colophon">Designed, built and occasionally rebuilt by Ming and Claude. Astro · GitHub Pages.</p>
 	</div>
 </nav>
 
@@ -165,6 +167,12 @@ const works = await getWorks();
 	.work-title {
 		overflow-wrap: anywhere;
 	}
+	.colophon {
+		margin: 0.8vw 0 0;
+		color: var(--label);
+		font-size: 0.72vw;
+		line-height: 1.25;
+	}
 
 	/* ---------- Phones: a top bar with a menu button ---------- */
 	@media (max-width: 899px) {
@@ -227,6 +235,10 @@ const works = await getWorks();
 		}
 		.works-label {
 			padding: 12px;
+			font-size: 13px;
+		}
+		.colophon {
+			margin-top: 14px;
 			font-size: 13px;
 		}
 		.works-list a {
