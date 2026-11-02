@@ -1,6 +1,6 @@
 ---
 title: Academic Work
-type: Modeling, Animation
+type: Animation
 category: Personal Work
 summary: 3 projects done in school that won 3 awards
 role: 3d modelling, rendering, animation
