@@ -16,15 +16,18 @@ pieces:
     media:
       - /media/works/suss/lamp/lab-reportmingkaitanusg-1.mp4
       - /media/works/suss/lamp/document.jpg
+      - /media/works/suss/lamp/0002png0040.png
+      - /media/works/suss/lamp/0110.png
+      - /media/works/suss/lamp/0060.png
+      - /media/works/suss/lamp/0002png0020.png
+      - /media/works/suss/lamp/0002png0040-1.png
   - title: Relief Aid Drone
     caption: 'This animation won the "Best digital animation" for its category as
       well. It is a drone that can deliver a payload of relief aid provisions
       and fly off. '
     media:
-      - /media/works/suss/drone/picture-1.png
-      - /media/works/suss/drone/picture-2.png
-      - /media/works/suss/drone/picture-3.png
-      - /media/works/suss/drone/picture-4.png
+      - /media/works/suss/drone/relief-aid-drone.mp4
+      - /media/works/suss/drone/drone-shot-remastered0001-0420.mp4
       - /media/works/suss/drone/untitledartwork-4.jpg
       - /media/works/suss/drone/untitledartwork-5-1.jpg
   - title: Campus Canteen
