@@ -15,8 +15,7 @@ pieces:
       animation. '
     media:
       - /media/works/suss/lamp/lab-reportmingkaitanusg-1.mp4
-      - /media/works/suss/lamp/storyboard-page-1.jpeg
-      - /media/works/suss/lamp/storyboard-page-2.jpeg
+      - /media/works/suss/lamp/document.jpg
   - title: Relief Aid Drone
     caption: 'This animation won the "Best digital animation" for its category as
       well. It is a drone that can deliver a payload of relief aid provisions
