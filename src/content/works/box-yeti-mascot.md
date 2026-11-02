@@ -7,7 +7,7 @@ role: Illustration, Character Design, Prepress
 date: 14 June 2024
 projectType: Internal Company Project
 doneUnder: Paper Carpenter
-cover: /media/works/box yeti/c763e5158556263638e105b38c9b.jpg
+cover: /media/works/box yeti/img1259.png
 gallery:
   - /media/works/box yeti/c763e5158556263638e105b38c9b.jpg
   - /media/works/box yeti/85af5c158556263638e105b37718.jpg
