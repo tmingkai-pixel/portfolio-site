@@ -35,6 +35,7 @@ pieces:
       university campus canteen with the colors and my partner Sabrina help
       generate the decal designs around the building. "
     media:
+      - /media/works/suss/canteen/campus-canteen.mp4
       - /media/works/suss/canteen/shot1hero.png
       - /media/works/suss/canteen/shot2decals.png
       - /media/works/suss/canteen/shot4seating.png
@@ -43,6 +44,7 @@ pieces:
       - /media/works/suss/canteen/untitledartwork.jpg
 sound:
   - /media/works/suss/lamp/lab-reportmingkaitanusg-1.mp4
+  - /media/works/suss/canteen/campus-canteen.mp4
 draft: false
 ---
 These are the 3 assignments I did for my MTD311 Interactive Digital Animation class. They won an award each although I had not known they were entered into a competition until I got the invite for the award ceremony. I dedicate the awards to my macbook whom was overworked for these projects. 
